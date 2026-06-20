@@ -26,7 +26,22 @@
     .sub { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
 
     .card { background: var(--card); border-radius: 18px; padding: 18px; box-shadow: 0 8px 22px rgba(120,70,30,0.10); margin-bottom: 16px; }
-    .card h2 { font-family: "Fredoka", sans-serif; font-size: 1.05rem; margin: 0 0 12px; }
+    .card h2 { font-family: "Fredoka", sans-serif; font-size: 1.05rem; margin: 0 0 4px; }
+    .addhint { color: var(--muted); font-weight: 700; font-size: 0.86rem; margin: 0 0 14px; }
+
+    input {
+      width: 100%; font-family: inherit; font-size: 1.05rem; padding: 12px 14px;
+      border: 2px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink);
+      outline: none; transition: border-color 0.15s, box-shadow 0.15s; margin-bottom: 10px;
+    }
+    input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255,107,74,0.3); }
+    .choices { display: flex; gap: 8px; margin-bottom: 10px; }
+    .choice {
+      flex: 1; text-align: center; font-family: "Fredoka", sans-serif; font-weight: 600;
+      font-size: 0.98rem; padding: 10px 6px; border: 2px solid var(--line);
+      border-radius: 11px; background: #fff; color: var(--ink); cursor: pointer; transition: all 0.12s;
+    }
+    .choice.selected { border-color: var(--accent); background: var(--pill); color: var(--accent-dark); }
 
     .buckets { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .bucket { background: var(--pill); border-radius: 12px; padding: 10px 12px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
@@ -34,10 +49,12 @@
     .total { text-align: center; font-family: "Fredoka", sans-serif; font-size: 1.05rem; margin-top: 12px; color: var(--muted); }
 
     .players { display: flex; flex-wrap: wrap; gap: 8px; }
-    .ptag { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1.5px solid var(--line); border-radius: 999px; padding: 7px 12px; font-weight: 700; font-size: 0.92rem; }
+    .ptag { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1.5px solid var(--line); border-radius: 999px; padding: 7px 8px 7px 12px; font-weight: 700; font-size: 0.92rem; }
     .ptag .meta { color: var(--muted); font-weight: 700; font-size: 0.82rem; }
+    .ptag .x { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #f4e7df; color: var(--muted); cursor: pointer; font-weight: 800; font-size: 0.95rem; line-height: 1; }
+    .ptag .x:hover { background: #f6d3cc; color: var(--danger); }
 
-    .btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+    .btns { display: flex; flex-wrap: wrap; gap: 10px; }
     button {
       font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 1rem; color: #fff;
       background: var(--accent); border: none; border-radius: 12px; padding: 13px 18px;
@@ -59,6 +76,7 @@
     .team li { background: rgba(255,255,255,0.22); border-radius: 9px; padding: 6px 10px; font-weight: 700; font-size: 0.92rem; }
     .empty { color: var(--muted); font-weight: 700; text-align: center; padding: 14px 0; }
     .note { color: var(--muted); font-weight: 700; font-size: 0.88rem; margin-top: 10px; text-align: center; }
+    .warn { background: #fff3e0; border: 1.5px solid #ffd49b; color: #8a5a00; border-radius: 12px; padding: 10px 12px; font-weight: 700; font-size: 0.9rem; margin-bottom: 12px; }
     @media (max-width: 440px) { .teams { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -69,7 +87,23 @@
       <span class="tag">Admin</span>
     </header>
     <p class="sub">Tableau de bord — tirage des équipes</p>
-    <div id="app"><div class="card"><div class="empty">Chargement…</div></div></div>
+
+    <div class="card" id="addCard">
+      <h2>➕ Ajouter quelqu'un à la main</h2>
+      <p class="addhint">Pour les enfants ou ceux qui n'ont pas de téléphone.</p>
+      <input id="addName" type="text" placeholder="Prénom" autocomplete="off" maxlength="40" />
+      <div class="choices" id="addSex">
+        <div class="choice" data-val="H">Homme</div>
+        <div class="choice" data-val="F">Femme</div>
+      </div>
+      <div class="choices" id="addAge">
+        <div class="choice" data-val="jeune">Jeune</div>
+        <div class="choice" data-val="senior">Sénior</div>
+      </div>
+      <button id="addBtn" style="width:100%">＋ Ajouter à la liste</button>
+    </div>
+
+    <div id="dynamic"><div class="card"><div class="empty">Chargement…</div></div></div>
   </div>
 
   <script type="module">
@@ -84,7 +118,7 @@
       3: { name: "Vert",  emoji: "🟢", hex: "#1f9d63" },
       4: { name: "Jaune", emoji: "🟡", hex: "#e8a200" },
     };
-    const app = document.getElementById("app");
+    const dyn = document.getElementById("dynamic");
     let players = [];
 
     function escapeHtml(s) {
@@ -93,9 +127,43 @@
     const sexLabel = (s) => (s === "H" ? "H" : s === "F" ? "F" : "?");
     const ageLabel = (a) => (a === "jeune" ? "Jeune" : a === "senior" ? "Sénior" : "?");
 
+    // ---------- ADD FORM (statique, monté une seule fois) ----------
+    let addSex = null, addAge = null;
+    function wireChoiceGroup(id, setter) {
+      const c = document.getElementById(id);
+      c.querySelectorAll(".choice").forEach((el) => {
+        el.addEventListener("click", () => {
+          c.querySelectorAll(".choice").forEach((x) => x.classList.remove("selected"));
+          el.classList.add("selected");
+          setter(el.dataset.val);
+        });
+      });
+    }
+    wireChoiceGroup("addSex", (v) => (addSex = v));
+    wireChoiceGroup("addAge", (v) => (addAge = v));
+    const addName = document.getElementById("addName");
+    const addBtn = document.getElementById("addBtn");
+    addBtn.addEventListener("click", async () => {
+      const name = addName.value.trim();
+      if (!name) { addName.focus(); return; }
+      if (!addSex) { alert("Choisis Homme ou Femme"); return; }
+      if (!addAge) { alert("Choisis Jeune ou Sénior"); return; }
+      addBtn.disabled = true; addBtn.textContent = "Ajout…";
+      const { error } = await supabase.from("players").insert({ name, sex: addSex, age_group: addAge });
+      addBtn.disabled = false; addBtn.textContent = "＋ Ajouter à la liste";
+      if (error) { alert("Erreur : " + error.message); return; }
+      addName.value = "";
+      addSex = null; addAge = null;
+      document.querySelectorAll("#addSex .choice, #addAge .choice").forEach((x) => x.classList.remove("selected"));
+      addName.focus();
+      load();
+    });
+    addName.addEventListener("keydown", (e) => { if (e.key === "Enter") addBtn.click(); });
+
+    // ---------- LOAD + RENDER (dynamique) ----------
     async function load() {
       const { data, error } = await supabase.from("players").select("*").order("created_at", { ascending: true });
-      if (error) { console.error(error); app.innerHTML = `<div class="card"><div class="empty">Erreur : ${escapeHtml(error.message)}</div></div>`; return; }
+      if (error) { console.error(error); dyn.innerHTML = `<div class="card"><div class="empty">Erreur : ${escapeHtml(error.message)}</div></div>`; return; }
       players = data || [];
       render();
     }
@@ -103,15 +171,15 @@
     function render() {
       const total = players.length;
       const assigned = players.some((p) => p.team);
+      const unplaced = players.filter((p) => !p.team);
 
-      // Buckets
       const b = { "H-jeune": 0, "F-jeune": 0, "H-senior": 0, "F-senior": 0 };
       players.forEach((p) => { const k = `${p.sex}-${p.age_group}`; if (k in b) b[k]++; });
 
       let html = `
         <div class="card">
           <h2>Inscrits</h2>
-          <div class="buckets">
+          <div class="buckets" style="margin-top:12px">
             <div class="bucket"><span>🧑 Jeunes hommes</span><span class="n">${b["H-jeune"]}</span></div>
             <div class="bucket"><span>👩 Jeunes femmes</span><span class="n">${b["F-jeune"]}</span></div>
             <div class="bucket"><span>👴 Séniors hommes</span><span class="n">${b["H-senior"]}</span></div>
@@ -120,13 +188,17 @@
           <div class="total">Total : ${total} cousin·e·s</div>
         </div>`;
 
+      const tagList = (arr) => arr.map((p) =>
+        `<span class="ptag">${escapeHtml(p.name)} <span class="meta">${sexLabel(p.sex)} · ${ageLabel(p.age_group)}</span><span class="x" data-del="${p.id}" data-name="${escapeHtml(p.name)}">✕</span></span>`
+      ).join("");
+
       if (!assigned) {
         html += `<div class="card">
           <h2>En attente du tirage</h2>
-          <div class="players">${
+          <div class="players" style="margin-top:12px">${
             total === 0
-              ? `<div class="empty">Personne pour l'instant… partage le lien aux cousins !</div>`
-              : players.map((p) => `<span class="ptag">${escapeHtml(p.name)} <span class="meta">${sexLabel(p.sex)} · ${ageLabel(p.age_group)}</span></span>`).join("")
+              ? `<div class="empty">Personne pour l'instant… partage le lien (ou ajoute des gens à la main) !</div>`
+              : tagList(players)
           }</div>
           <div class="btns" style="margin-top:16px">
             <button id="drawBtn" ${total < 4 ? "disabled" : ""}>🎲 Lancer le tirage</button>
@@ -138,7 +210,8 @@
         players.forEach((p) => { if (p.team) byTeam[p.team].push(p); });
         html += `<div class="card">
           <h2>Les 4 équipes</h2>
-          <div class="teams">${[1,2,3,4].map((t) => {
+          ${unplaced.length ? `<div class="warn" style="margin-top:10px">⚠️ ${unplaced.length} joueur·euse·s pas encore placé·e·s — relance le tirage pour les intégrer.</div>` : ""}
+          <div class="teams" style="margin-top:12px">${[1,2,3,4].map((t) => {
             const list = byTeam[t];
             const h = list.filter((p) => p.sex === "H").length;
             const f = list.filter((p) => p.sex === "F").length;
@@ -150,6 +223,7 @@
               <ul>${list.map((p) => `<li>${escapeHtml(p.name)}</li>`).join("") || `<li>—</li>`}</ul>
             </div>`;
           }).join("")}</div>
+          ${unplaced.length ? `<h2 style="margin-top:16px">Pas encore placé·e·s</h2><div class="players" style="margin-top:10px">${tagList(unplaced)}</div>` : ""}
           <div class="btns" style="margin-top:16px">
             <button id="drawBtn">🔄 Refaire le tirage</button>
             <button id="clearBtn" class="ghost">Annuler le tirage</button>
@@ -158,11 +232,11 @@
       }
 
       html += `<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-        <span class="meta" style="color:var(--muted);font-weight:800">Repartir de zéro pour un test</span>
+        <span style="color:var(--muted);font-weight:800">Repartir de zéro pour un test</span>
         <button id="wipeBtn" class="danger">🗑️ Tout effacer</button>
       </div>`;
 
-      app.innerHTML = html;
+      dyn.innerHTML = html;
 
       const drawBtn = document.getElementById("drawBtn");
       if (drawBtn) drawBtn.addEventListener("click", runDraw);
@@ -170,49 +244,33 @@
       if (clearBtn) clearBtn.addEventListener("click", clearTeams);
       const wipeBtn = document.getElementById("wipeBtn");
       if (wipeBtn) wipeBtn.addEventListener("click", wipeAll);
+      dyn.querySelectorAll("[data-del]").forEach((el) => {
+        el.addEventListener("click", () => deletePlayer(el.dataset.del, el.dataset.name));
+      });
     }
 
     function shuffle(arr) {
       const a = arr.slice();
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
+      for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
       return a;
     }
 
     async function runDraw() {
-      // Répartit chaque "paquet" (sexe + âge) équitablement entre les 4 équipes,
-      // en faisant tourner l'équipe de départ pour que les restes s'étalent.
       const buckets = {};
-      players.forEach((p) => {
-        const k = `${p.sex}-${p.age_group}`;
-        (buckets[k] = buckets[k] || []).push(p);
-      });
+      players.forEach((p) => { const k = `${p.sex}-${p.age_group}`; (buckets[k] = buckets[k] || []).push(p); });
       const assignments = [];
       let start = 0;
       Object.values(buckets).forEach((bucket) => {
         const arr = shuffle(bucket);
-        arr.forEach((p, i) => {
-          const team = ((start + i) % 4) + 1;
-          assignments.push({ id: p.id, team });
-        });
+        arr.forEach((p, i) => { assignments.push({ id: p.id, team: ((start + i) % 4) + 1 }); });
         start = (start + arr.length) % 4;
       });
-
       const btn = document.getElementById("drawBtn");
       if (btn) { btn.disabled = true; btn.textContent = "Tirage en cours…"; }
-      const { error } = await applyTeams(assignments);
-      if (error) { alert("Erreur pendant le tirage : " + error.message); }
+      const results = await Promise.all(assignments.map((a) => supabase.from("players").update({ team: a.team }).eq("id", a.id)));
+      const err = results.find((r) => r.error);
+      if (err) alert("Erreur pendant le tirage : " + err.error.message);
       await load();
-    }
-
-    async function applyTeams(assignments) {
-      const results = await Promise.all(
-        assignments.map((a) => supabase.from("players").update({ team: a.team }).eq("id", a.id))
-      );
-      const firstErr = results.find((r) => r.error);
-      return { error: firstErr ? firstErr.error : null };
     }
 
     async function clearTeams() {
@@ -222,16 +280,26 @@
       await load();
     }
 
+    async function deletePlayer(id, name) {
+      if (!confirm(`Retirer ${name} de la liste ?`)) return;
+      const { error } = await supabase.from("players").delete().eq("id", id);
+      if (error) { alert("Erreur : " + error.message); return; }
+      await load();
+    }
+
     async function wipeAll() {
-      if (!confirm("⚠️ Effacer TOUS les inscrits ? (à utiliser seulement pour repartir d'un test propre)")) return;
+      if (!confirm("⚠️ Effacer TOUS les inscrits ? (seulement pour repartir d'un test propre)")) return;
       await supabase.from("players").delete().neq("id", "00000000-0000-0000-0000-000000000000");
       await load();
     }
 
-    supabase
-      .channel("admin-watch")
+    supabase.channel("admin-watch")
       .on("postgres_changes", { event: "*", schema: "public", table: "players" }, () => load())
       .subscribe();
+
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") load(); });
+    window.addEventListener("focus", load);
+    window.addEventListener("online", load);
 
     load();
   </script>

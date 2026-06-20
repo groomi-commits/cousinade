@@ -272,6 +272,18 @@
       }
       subscribeRealtime();
     }
+
+    // Resynchronise l'état dès que le téléphone se rallume / revient sur l'onglet / retrouve le réseau
+    async function refreshState() {
+      if (!myId) return;
+      const { data } = await supabase.from("players").select("*").eq("id", myId).maybeSingle();
+      if (data) { myPlayer = data; showStatus(); }
+      else { localStorage.removeItem(STORAGE_KEY); myId = null; myPlayer = null; showJoinForm(); }
+    }
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refreshState(); });
+    window.addEventListener("focus", refreshState);
+    window.addEventListener("online", refreshState);
+
     init();
   </script>
 </body>

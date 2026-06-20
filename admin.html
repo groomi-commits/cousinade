@@ -14,11 +14,7 @@
       --danger: #c0392b; --green: #1f9d63;
     }
     * { box-sizing: border-box; }
-    body {
-      margin: 0; min-height: 100vh; font-family: "Nunito", system-ui, sans-serif;
-      color: var(--ink); background: var(--bg);
-      display: flex; justify-content: center; padding: 24px 16px 60px;
-    }
+    body { margin: 0; min-height: 100vh; font-family: "Nunito", system-ui, sans-serif; color: var(--ink); background: var(--bg); display: flex; justify-content: center; padding: 24px 16px 60px; }
     .container { width: 100%; max-width: 640px; }
     header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
     h1 { font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 1.7rem; margin: 0; }
@@ -29,18 +25,10 @@
     .card h2 { font-family: "Fredoka", sans-serif; font-size: 1.05rem; margin: 0 0 4px; }
     .addhint { color: var(--muted); font-weight: 700; font-size: 0.86rem; margin: 0 0 14px; }
 
-    input {
-      width: 100%; font-family: inherit; font-size: 1.05rem; padding: 12px 14px;
-      border: 2px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink);
-      outline: none; transition: border-color 0.15s, box-shadow 0.15s; margin-bottom: 10px;
-    }
+    input { width: 100%; font-family: inherit; font-size: 1.05rem; padding: 12px 14px; border: 2px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); outline: none; transition: border-color 0.15s, box-shadow 0.15s; margin-bottom: 10px; }
     input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255,107,74,0.3); }
     .choices { display: flex; gap: 8px; margin-bottom: 10px; }
-    .choice {
-      flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; font-family: "Fredoka", sans-serif; font-weight: 600;
-      font-size: 0.95rem; padding: 10px 6px; border: 2px solid var(--line);
-      border-radius: 11px; background: #fff; color: var(--ink); cursor: pointer; transition: all 0.12s;
-    }
+    .choice { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 0.95rem; padding: 10px 6px; border: 2px solid var(--line); border-radius: 11px; background: #fff; color: var(--ink); cursor: pointer; transition: all 0.12s; }
     .choice.selected { border-color: var(--accent); background: var(--pill); color: var(--accent-dark); }
 
     .buckets { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
@@ -55,20 +43,13 @@
     .x:hover { background: #f6d3cc; color: var(--danger); }
 
     .btns { display: flex; flex-wrap: wrap; gap: 10px; }
-    button {
-      font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 1rem; color: #fff;
-      background: var(--accent); border: none; border-radius: 12px; padding: 13px 18px;
-      cursor: pointer; transition: background 0.15s, transform 0.05s; flex: 1; min-width: 150px;
-    }
+    button { font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 1rem; color: #fff; background: var(--accent); border: none; border-radius: 12px; padding: 13px 18px; cursor: pointer; transition: background 0.15s, transform 0.05s; flex: 1; min-width: 150px; }
     button:hover { background: var(--accent-dark); }
     button:active { transform: translateY(1px); }
     button:disabled { opacity: 0.6; cursor: default; }
-    button.reveal { background: var(--green); }
-    button.reveal:hover { background: #18804f; }
-    button.ghost { background: #fff; color: var(--ink); border: 2px solid var(--line); }
-    button.ghost:hover { background: #faf4ec; }
-    button.danger { background: #fff; color: var(--danger); border: 2px solid #f0cfc9; flex: none; min-width: auto; padding: 10px 14px; font-size: 0.88rem; }
-    button.danger:hover { background: #fdeeec; }
+    button.reveal { background: var(--green); } button.reveal:hover { background: #18804f; }
+    button.ghost { background: #fff; color: var(--ink); border: 2px solid var(--line); } button.ghost:hover { background: #faf4ec; }
+    button.danger { background: #fff; color: var(--danger); border: 2px solid #f0cfc9; flex: none; min-width: auto; padding: 10px 14px; font-size: 0.88rem; } button.danger:hover { background: #fdeeec; }
 
     .banner { border-radius: 12px; padding: 11px 14px; font-weight: 800; font-size: 0.92rem; margin-bottom: 14px; }
     .banner.todo { background: #eef4ff; border: 1.5px solid #c7d9ff; color: #2b4d99; }
@@ -77,7 +58,8 @@
 
     .teams { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
     .teamcard { background: #fff; border: 2px solid var(--line); border-radius: 16px; padding: 12px; }
-    .teamcard .head { display: flex; align-items: center; gap: 8px; font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 1.1rem; }
+    .teamcard .head { display: flex; align-items: center; gap: 8px; font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 1.05rem; }
+    .teamcard .head .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .swatch { width: 14px; height: 14px; border-radius: 50%; flex: none; }
     .teamcard .comp { color: var(--muted); font-weight: 800; font-size: 0.76rem; margin: 4px 0 8px; }
     .member { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 2px; border-top: 1px solid var(--line); }
@@ -88,6 +70,8 @@
     .chip { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--line); transition: transform 0.08s; }
     .chip:hover { transform: scale(1.18); }
     .chip.current { box-shadow: 0 0 0 2px var(--ink); cursor: default; }
+    .capselect { display: flex; align-items: center; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); font-weight: 800; font-size: 0.82rem; color: var(--muted); }
+    .capselect select { flex: 1; font-family: inherit; font-weight: 700; font-size: 0.88rem; padding: 7px 8px; border: 1.5px solid var(--line); border-radius: 9px; background: #fff; color: var(--ink); margin: 0; }
     .empty { color: var(--muted); font-weight: 700; text-align: center; padding: 14px 0; }
     .note { color: var(--muted); font-weight: 700; font-size: 0.88rem; margin-top: 10px; text-align: center; }
     @media (max-width: 460px) { .teams { grid-template-columns: 1fr; } }
@@ -133,23 +117,21 @@
     };
     const dyn = document.getElementById("dynamic");
     let players = [];
+    let teamsData = {};
 
-    function escapeHtml(s) {
-      return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-    }
+    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
     const sexLabel = (s) => (s === "H" ? "H" : s === "F" ? "F" : "?");
     const ageLabel = (a) => (a === "jeune" ? "Jeune" : a === "senior" ? "Sénior" : "?");
+    const teamName = (t) => (teamsData[t] && teamsData[t].name && teamsData[t].name.trim()) ? teamsData[t].name : `Équipe ${TEAMS[t].name}`;
 
-    // ---------- ADD FORM (statique) ----------
+    // ---------- ADD FORM ----------
     let addSex = null, addAge = null;
     function wireChoiceGroup(id, setter) {
       const c = document.getElementById(id);
-      c.querySelectorAll(".choice").forEach((el) => {
-        el.addEventListener("click", () => {
-          c.querySelectorAll(".choice").forEach((x) => x.classList.remove("selected"));
-          el.classList.add("selected"); setter(el.dataset.val);
-        });
-      });
+      c.querySelectorAll(".choice").forEach((el) => el.addEventListener("click", () => {
+        c.querySelectorAll(".choice").forEach((x) => x.classList.remove("selected"));
+        el.classList.add("selected"); setter(el.dataset.val);
+      }));
     }
     wireChoiceGroup("addSex", (v) => (addSex = v));
     wireChoiceGroup("addAge", (v) => (addAge = v));
@@ -172,9 +154,13 @@
 
     // ---------- LOAD ----------
     async function load() {
-      const { data, error } = await supabase.from("players").select("*").order("created_at", { ascending: true });
-      if (error) { console.error(error); dyn.innerHTML = `<div class="card"><div class="empty">Erreur : ${escapeHtml(error.message)}</div></div>`; return; }
-      players = data || [];
+      const [pRes, tRes] = await Promise.all([
+        supabase.from("players").select("*").order("created_at", { ascending: true }),
+        supabase.from("teams").select("*"),
+      ]);
+      if (pRes.error) { dyn.innerHTML = `<div class="card"><div class="empty">Erreur : ${escapeHtml(pRes.error.message)}</div></div>`; return; }
+      players = pRes.data || [];
+      teamsData = {}; (tRes.data || []).forEach((t) => (teamsData[t.id] = t));
       render();
     }
 
@@ -192,23 +178,15 @@
         <div class="total">Total : ${players.length} cousin·e·s</div>
       </div>`;
     }
-
     function tagList(arr) {
-      return arr.map((p) =>
-        `<span class="ptag">${escapeHtml(p.name)} <span class="meta">${sexLabel(p.sex)} · ${ageLabel(p.age_group)}</span><span class="x" data-del="${p.id}" data-name="${escapeHtml(p.name)}">✕</span></span>`
-      ).join("");
+      return arr.map((p) => `<span class="ptag">${escapeHtml(p.name)} <span class="meta">${sexLabel(p.sex)} · ${ageLabel(p.age_group)}</span><span class="x" data-del="${p.id}" data-name="${escapeHtml(p.name)}">✕</span></span>`).join("");
     }
-
-    function memberHtml(p) {
-      const chips = [1,2,3,4].map((t) =>
-        `<span class="chip ${p.draft_team === t ? "current" : ""}" style="background:${TEAMS[t].hex}" ${p.draft_team === t ? "" : `data-move-id="${p.id}" data-move-team="${t}"`} title="${TEAMS[t].name}"></span>`
-      ).join("");
+    function memberHtml(p, captainId) {
+      const isCap = captainId && p.id === captainId;
+      const chips = [1,2,3,4].map((t) => `<span class="chip ${p.draft_team === t ? "current" : ""}" style="background:${TEAMS[t].hex}" ${p.draft_team === t ? "" : `data-move-id="${p.id}" data-move-team="${t}"`} title="${TEAMS[t].name}"></span>`).join("");
       return `<div class="member">
-        <span class="nm">${escapeHtml(p.name)}</span>
-        <span class="ctrls">
-          <span class="chips">${chips}</span>
-          <span class="x" data-del="${p.id}" data-name="${escapeHtml(p.name)}">✕</span>
-        </span>
+        <span class="nm">${isCap ? "👑 " : ""}${escapeHtml(p.name)}</span>
+        <span class="ctrls"><span class="chips">${chips}</span><span class="x" data-del="${p.id}" data-name="${escapeHtml(p.name)}">✕</span></span>
       </div>`;
     }
 
@@ -221,21 +199,13 @@
       let html = bucketsHtml();
 
       if (!hasDraft) {
-        // ---- LOBBY ----
         html += `<div class="card">
           <h2>En attente du tirage</h2>
-          <div class="players" style="margin-top:12px">${
-            total === 0
-              ? `<div class="empty">Personne pour l'instant… partage le lien (ou ajoute des gens à la main) !</div>`
-              : tagList(players)
-          }</div>
-          <div class="btns" style="margin-top:16px">
-            <button id="drawBtn" ${total < 4 ? "disabled" : ""}>🎲 Lancer le tirage</button>
-          </div>
+          <div class="players" style="margin-top:12px">${total === 0 ? `<div class="empty">Personne pour l'instant… partage le lien (ou ajoute des gens à la main) !</div>` : tagList(players)}</div>
+          <div class="btns" style="margin-top:16px"><button id="drawBtn" ${total < 4 ? "disabled" : ""}>🎲 Lancer le tirage</button></div>
           ${total > 0 && total < 4 ? `<div class="note">Il faut au moins 4 inscrits pour faire 4 équipes.</div>` : ""}
         </div>`;
       } else {
-        // ---- REVIEW (brouillon) ----
         const byTeam = { 1: [], 2: [], 3: [], 4: [] };
         const unplaced = [];
         players.forEach((p) => { if (p.draft_team) byTeam[p.draft_team].push(p); else unplaced.push(p); });
@@ -247,12 +217,15 @@
 
         const teamsHtml = [1,2,3,4].map((t) => {
           const list = byTeam[t];
+          const capId = teamsData[t] ? teamsData[t].captain_id : null;
           const h = list.filter((p) => p.sex === "H").length, f = list.filter((p) => p.sex === "F").length;
           const j = list.filter((p) => p.age_group === "jeune").length, s = list.filter((p) => p.age_group === "senior").length;
+          const capOptions = `<option value="">— aucun —</option>` + list.map((p) => `<option value="${p.id}" ${capId === p.id ? "selected" : ""}>${escapeHtml(p.name)}</option>`).join("");
           return `<div class="teamcard">
-            <div class="head"><span class="swatch" style="background:${TEAMS[t].hex}"></span>${TEAMS[t].name}</div>
+            <div class="head"><span class="swatch" style="background:${TEAMS[t].hex}"></span><span class="nm">${escapeHtml(teamName(t))}</span><span class="x" data-edit-team="${t}" title="Renommer">✏️</span></div>
             <div class="comp">${list.length} joueur·s · ${h}H/${f}F · ${j}J/${s}S</div>
-            ${list.map(memberHtml).join("") || `<div class="empty" style="padding:8px 0">—</div>`}
+            ${list.map((p) => memberHtml(p, capId)).join("") || `<div class="empty" style="padding:8px 0">—</div>`}
+            ${list.length ? `<div class="capselect">👑 Chef :<select data-cap-team="${t}">${capOptions}</select></div>` : ""}
           </div>`;
         }).join("");
 
@@ -262,14 +235,11 @@
 
         html += `<div class="card">
           <h2>Les 4 équipes ${revealed ? "" : "(brouillon)"}</h2>
-          <p class="addhint">Clique un point de couleur pour déplacer quelqu'un.</p>
+          <p class="addhint">Point de couleur = déplacer · ✏️ = renommer · 👑 = désigner le chef.</p>
           ${banner}
           <div class="teams">${teamsHtml}</div>
-          ${unplaced.length ? `<h2 style="margin-top:16px">Pas encore dans une équipe</h2>
-            <div style="margin-top:8px">${unplaced.map(memberHtml).join("")}</div>` : ""}
-          <div class="btns" style="margin-top:16px">
-            ${revealBtn}
-          </div>
+          ${unplaced.length ? `<h2 style="margin-top:16px">Pas encore dans une équipe</h2><div style="margin-top:8px">${unplaced.map((p) => memberHtml(p, null)).join("")}</div>` : ""}
+          <div class="btns" style="margin-top:16px">${revealBtn}</div>
           <div class="btns" style="margin-top:10px">
             <button id="drawBtn" class="ghost">🎲 Refaire le tirage</button>
             <button id="clearBtn" class="ghost">Annuler le tirage</button>
@@ -290,22 +260,19 @@
       const wipeBtn = document.getElementById("wipeBtn"); if (wipeBtn) wipeBtn.addEventListener("click", wipeAll);
       dyn.querySelectorAll("[data-del]").forEach((el) => el.addEventListener("click", () => deletePlayer(el.dataset.del, el.dataset.name)));
       dyn.querySelectorAll("[data-move-id]").forEach((el) => el.addEventListener("click", () => movePlayer(el.dataset.moveId, parseInt(el.dataset.moveTeam, 10))));
+      dyn.querySelectorAll("[data-edit-team]").forEach((el) => el.addEventListener("click", () => editTeamName(parseInt(el.dataset.editTeam, 10))));
+      dyn.querySelectorAll("[data-cap-team]").forEach((el) => el.addEventListener("change", () => setCaptain(parseInt(el.dataset.capTeam, 10), el.value || null)));
     }
 
-    function shuffle(arr) {
-      const a = arr.slice();
-      for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
-      return a;
-    }
+    function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
     async function runDraw() {
       const buckets = {};
       players.forEach((p) => { const k = `${p.sex}-${p.age_group}`; (buckets[k] = buckets[k] || []).push(p); });
-      const assignments = [];
-      let start = 0;
+      const assignments = []; let start = 0;
       Object.values(buckets).forEach((bucket) => {
         const arr = shuffle(bucket);
-        arr.forEach((p, i) => { assignments.push({ id: p.id, team: ((start + i) % 4) + 1 }); });
+        arr.forEach((p, i) => assignments.push({ id: p.id, team: ((start + i) % 4) + 1 }));
         start = (start + arr.length) % 4;
       });
       const btn = document.getElementById("drawBtn");
@@ -315,13 +282,24 @@
       if (err) alert("Erreur pendant le tirage : " + err.error.message);
       await load();
     }
-
     async function movePlayer(id, team) {
       const { error } = await supabase.from("players").update({ draft_team: team }).eq("id", id);
       if (error) { alert("Erreur : " + error.message); return; }
       await load();
     }
-
+    async function setCaptain(team, playerId) {
+      const { error } = await supabase.from("teams").update({ captain_id: playerId }).eq("id", team);
+      if (error) { alert("Erreur : " + error.message); return; }
+      await load();
+    }
+    async function editTeamName(team) {
+      const current = (teamsData[team] && teamsData[team].name) ? teamsData[team].name : "";
+      const n = prompt("Nom de l'équipe (laisse vide pour revenir à la couleur) :", current);
+      if (n === null) return;
+      const { error } = await supabase.from("teams").update({ name: n.trim() || null }).eq("id", team);
+      if (error) { alert("Erreur : " + error.message); return; }
+      await load();
+    }
     async function reveal() {
       const btn = document.getElementById("revealBtn");
       if (btn) { btn.disabled = true; btn.textContent = "Publication…"; }
@@ -331,20 +309,17 @@
       if (err) alert("Erreur : " + err.error.message);
       await load();
     }
-
     async function clearTeams() {
       if (!confirm("Annuler le tirage et remettre tout le monde en attente ?")) return;
       await Promise.all(players.map((p) => supabase.from("players").update({ team: null, draft_team: null }).eq("id", p.id)));
       await load();
     }
-
     async function deletePlayer(id, name) {
       if (!confirm(`Retirer ${name} de la liste ?`)) return;
       const { error } = await supabase.from("players").delete().eq("id", id);
       if (error) { alert("Erreur : " + error.message); return; }
       await load();
     }
-
     async function wipeAll() {
       if (!confirm("⚠️ Effacer TOUS les inscrits ? (seulement pour repartir d'un test propre)")) return;
       await supabase.from("players").delete().neq("id", "00000000-0000-0000-0000-000000000000");
@@ -353,6 +328,7 @@
 
     supabase.channel("admin-watch")
       .on("postgres_changes", { event: "*", schema: "public", table: "players" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "teams" }, () => load())
       .subscribe();
 
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") load(); });

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cousinade — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f4ede2; --card: #fffaf3; --ink: #3a2e22; --muted: #8a7a66;
+      --accent: #ff6b4a; --accent-dark: #e8543a; --line: #ece0d0; --pill: #fff0e6;
+      --danger: #c0392b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; font-family: "Nunito", system-ui, sans-serif;
+      color: var(--ink); background: var(--bg);
+      display: flex; justify-content: center; padding: 24px 16px 60px;
+    }
+    .container { width: 100%; max-width: 620px; }
+    header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+    h1 { font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 1.7rem; margin: 0; }
+    .tag { font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-dark); background: var(--pill); padding: 4px 10px; border-radius: 999px; }
+    .sub { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+
+    .card { background: var(--card); border-radius: 18px; padding: 18px; box-shadow: 0 8px 22px rgba(120,70,30,0.10); margin-bottom: 16px; }
+    .card h2 { font-family: "Fredoka", sans-serif; font-size: 1.05rem; margin: 0 0 12px; }
+
+    .buckets { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .bucket { background: var(--pill); border-radius: 12px; padding: 10px 12px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
+    .bucket .n { font-family: "Fredoka", sans-serif; font-size: 1.2rem; color: var(--accent-dark); }
+    .total { text-align: center; font-family: "Fredoka", sans-serif; font-size: 1.05rem; margin-top: 12px; color: var(--muted); }
+
+    .players { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ptag { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1.5px solid var(--line); border-radius: 999px; padding: 7px 12px; font-weight: 700; font-size: 0.92rem; }
+    .ptag .meta { color: var(--muted); font-weight: 700; font-size: 0.82rem; }
+
+    .btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+    button {
+      font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 1rem; color: #fff;
+      background: var(--accent); border: none; border-radius: 12px; padding: 13px 18px;
+      cursor: pointer; transition: background 0.15s, transform 0.05s; flex: 1; min-width: 150px;
+    }
+    button:hover { background: var(--accent-dark); }
+    button:active { transform: translateY(1px); }
+    button:disabled { opacity: 0.5; cursor: default; }
+    button.ghost { background: #fff; color: var(--ink); border: 2px solid var(--line); }
+    button.ghost:hover { background: #faf4ec; }
+    button.danger { background: #fff; color: var(--danger); border: 2px solid #f0cfc9; flex: none; min-width: auto; padding: 10px 14px; font-size: 0.88rem; }
+    button.danger:hover { background: #fdeeec; }
+
+    .teams { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .team { border-radius: 16px; padding: 14px; color: #fff; }
+    .team h3 { font-family: "Fredoka", sans-serif; margin: 0 0 4px; font-size: 1.2rem; }
+    .team .comp { font-weight: 800; font-size: 0.8rem; opacity: 0.92; margin-bottom: 10px; }
+    .team ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+    .team li { background: rgba(255,255,255,0.22); border-radius: 9px; padding: 6px 10px; font-weight: 700; font-size: 0.92rem; }
+    .empty { color: var(--muted); font-weight: 700; text-align: center; padding: 14px 0; }
+    .note { color: var(--muted); font-weight: 700; font-size: 0.88rem; margin-top: 10px; text-align: center; }
+    @media (max-width: 440px) { .teams { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎪 Cousinade</h1>
+      <span class="tag">Admin</span>
+    </header>
+    <p class="sub">Tableau de bord — tirage des équipes</p>
+    <div id="app"><div class="card"><div class="empty">Chargement…</div></div></div>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    const SUPABASE_URL = "https://bzspxqvbbdtefhugjogt.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_nAUDhRZoY7cd4FBRLACU5A_oule5R-0";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const TEAMS = {
+      1: { name: "Rouge", emoji: "🔴", hex: "#e23b2e" },
+      2: { name: "Bleu",  emoji: "🔵", hex: "#2f6df0" },
+      3: { name: "Vert",  emoji: "🟢", hex: "#1f9d63" },
+      4: { name: "Jaune", emoji: "🟡", hex: "#e8a200" },
+    };
+    const app = document.getElementById("app");
+    let players = [];
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+    const sexLabel = (s) => (s === "H" ? "H" : s === "F" ? "F" : "?");
+    const ageLabel = (a) => (a === "jeune" ? "Jeune" : a === "senior" ? "Sénior" : "?");
+
+    async function load() {
+      const { data, error } = await supabase.from("players").select("*").order("created_at", { ascending: true });
+      if (error) { console.error(error); app.innerHTML = `<div class="card"><div class="empty">Erreur : ${escapeHtml(error.message)}</div></div>`; return; }
+      players = data || [];
+      render();
+    }
+
+    function render() {
+      const total = players.length;
+      const assigned = players.some((p) => p.team);
+
+      // Buckets
+      const b = { "H-jeune": 0, "F-jeune": 0, "H-senior": 0, "F-senior": 0 };
+      players.forEach((p) => { const k = `${p.sex}-${p.age_group}`; if (k in b) b[k]++; });
+
+      let html = `
+        <div class="card">
+          <h2>Inscrits</h2>
+          <div class="buckets">
+            <div class="bucket"><span>🧑 Jeunes hommes</span><span class="n">${b["H-jeune"]}</span></div>
+            <div class="bucket"><span>👩 Jeunes femmes</span><span class="n">${b["F-jeune"]}</span></div>
+            <div class="bucket"><span>👴 Séniors hommes</span><span class="n">${b["H-senior"]}</span></div>
+            <div class="bucket"><span>👵 Séniors femmes</span><span class="n">${b["F-senior"]}</span></div>
+          </div>
+          <div class="total">Total : ${total} cousin·e·s</div>
+        </div>`;
+
+      if (!assigned) {
+        html += `<div class="card">
+          <h2>En attente du tirage</h2>
+          <div class="players">${
+            total === 0
+              ? `<div class="empty">Personne pour l'instant… partage le lien aux cousins !</div>`
+              : players.map((p) => `<span class="ptag">${escapeHtml(p.name)} <span class="meta">${sexLabel(p.sex)} · ${ageLabel(p.age_group)}</span></span>`).join("")
+          }</div>
+          <div class="btns" style="margin-top:16px">
+            <button id="drawBtn" ${total < 4 ? "disabled" : ""}>🎲 Lancer le tirage</button>
+          </div>
+          ${total > 0 && total < 4 ? `<div class="note">Il faut au moins 4 inscrits pour faire 4 équipes.</div>` : ""}
+        </div>`;
+      } else {
+        const byTeam = { 1: [], 2: [], 3: [], 4: [] };
+        players.forEach((p) => { if (p.team) byTeam[p.team].push(p); });
+        html += `<div class="card">
+          <h2>Les 4 équipes</h2>
+          <div class="teams">${[1,2,3,4].map((t) => {
+            const list = byTeam[t];
+            const h = list.filter((p) => p.sex === "H").length;
+            const f = list.filter((p) => p.sex === "F").length;
+            const j = list.filter((p) => p.age_group === "jeune").length;
+            const s = list.filter((p) => p.age_group === "senior").length;
+            return `<div class="team" style="background:${TEAMS[t].hex}">
+              <h3>${TEAMS[t].emoji} ${TEAMS[t].name}</h3>
+              <div class="comp">${list.length} joueur·euse·s · ${h}H/${f}F · ${j} jeune·s/${s} sénior·s</div>
+              <ul>${list.map((p) => `<li>${escapeHtml(p.name)}</li>`).join("") || `<li>—</li>`}</ul>
+            </div>`;
+          }).join("")}</div>
+          <div class="btns" style="margin-top:16px">
+            <button id="drawBtn">🔄 Refaire le tirage</button>
+            <button id="clearBtn" class="ghost">Annuler le tirage</button>
+          </div>
+        </div>`;
+      }
+
+      html += `<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <span class="meta" style="color:var(--muted);font-weight:800">Repartir de zéro pour un test</span>
+        <button id="wipeBtn" class="danger">🗑️ Tout effacer</button>
+      </div>`;
+
+      app.innerHTML = html;
+
+      const drawBtn = document.getElementById("drawBtn");
+      if (drawBtn) drawBtn.addEventListener("click", runDraw);
+      const clearBtn = document.getElementById("clearBtn");
+      if (clearBtn) clearBtn.addEventListener("click", clearTeams);
+      const wipeBtn = document.getElementById("wipeBtn");
+      if (wipeBtn) wipeBtn.addEventListener("click", wipeAll);
+    }
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    async function runDraw() {
+      // Répartit chaque "paquet" (sexe + âge) équitablement entre les 4 équipes,
+      // en faisant tourner l'équipe de départ pour que les restes s'étalent.
+      const buckets = {};
+      players.forEach((p) => {
+        const k = `${p.sex}-${p.age_group}`;
+        (buckets[k] = buckets[k] || []).push(p);
+      });
+      const assignments = [];
+      let start = 0;
+      Object.values(buckets).forEach((bucket) => {
+        const arr = shuffle(bucket);
+        arr.forEach((p, i) => {
+          const team = ((start + i) % 4) + 1;
+          assignments.push({ id: p.id, team });
+        });
+        start = (start + arr.length) % 4;
+      });
+
+      const btn = document.getElementById("drawBtn");
+      if (btn) { btn.disabled = true; btn.textContent = "Tirage en cours…"; }
+      const { error } = await applyTeams(assignments);
+      if (error) { alert("Erreur pendant le tirage : " + error.message); }
+      await load();
+    }
+
+    async function applyTeams(assignments) {
+      const results = await Promise.all(
+        assignments.map((a) => supabase.from("players").update({ team: a.team }).eq("id", a.id))
+      );
+      const firstErr = results.find((r) => r.error);
+      return { error: firstErr ? firstErr.error : null };
+    }
+
+    async function clearTeams() {
+      if (!confirm("Annuler le tirage et remettre tout le monde en attente ?")) return;
+      const ids = players.filter((p) => p.team).map((p) => p.id);
+      await Promise.all(ids.map((id) => supabase.from("players").update({ team: null }).eq("id", id)));
+      await load();
+    }
+
+    async function wipeAll() {
+      if (!confirm("⚠️ Effacer TOUS les inscrits ? (à utiliser seulement pour repartir d'un test propre)")) return;
+      await supabase.from("players").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      await load();
+    }
+
+    supabase
+      .channel("admin-watch")
+      .on("postgres_changes", { event: "*", schema: "public", table: "players" }, () => load())
+      .subscribe();
+
+    load();
+  </script>
+</body>
+</html>

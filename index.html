@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cousinade — Test</title>
+  <title>Cousinade</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg-top: #ffe7b8;
@@ -18,156 +18,79 @@
       --accent-dark: #e8543a;
       --ring: rgba(255, 107, 74, 0.35);
       --pill: #fff0e6;
+      --line: #f0e3d4;
     }
-
     * { box-sizing: border-box; }
-
     body {
-      margin: 0;
-      min-height: 100vh;
+      margin: 0; min-height: 100vh;
       font-family: "Nunito", system-ui, sans-serif;
       color: var(--ink);
       background: linear-gradient(170deg, var(--bg-top), var(--bg-bottom));
-      display: flex;
-      justify-content: center;
+      display: flex; justify-content: center;
       padding: 28px 18px 48px;
+      transition: background 0.5s ease;
     }
-
-    .container {
-      width: 100%;
-      max-width: 460px;
-    }
-
-    header {
-      text-align: center;
-      margin-bottom: 22px;
-    }
-
-    h1 {
-      font-family: "Fredoka", sans-serif;
-      font-weight: 700;
-      font-size: 2.1rem;
-      margin: 0;
-      letter-spacing: -0.5px;
-    }
-
-    .subtitle {
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: 22px;
-      padding: 22px;
-      box-shadow: 0 12px 30px rgba(120, 70, 30, 0.12);
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      font-weight: 700;
-      margin-bottom: 10px;
-      font-size: 1.05rem;
-    }
-
-    .join-row {
-      display: flex;
-      gap: 10px;
-    }
-
+    .container { width: 100%; max-width: 460px; }
+    header { text-align: center; margin-bottom: 22px; }
+    h1 { font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 2.1rem; margin: 0; letter-spacing: -0.5px; }
+    .subtitle { margin: 6px 0 0; color: var(--muted); font-weight: 700; font-size: 0.95rem; }
+    .card { background: var(--card); border-radius: 22px; padding: 22px; box-shadow: 0 12px 30px rgba(120,70,30,0.12); }
+    label { display: block; font-weight: 800; margin: 0 0 10px; font-size: 1.05rem; }
+    .field { margin-bottom: 20px; }
     input {
-      flex: 1;
-      min-width: 0;
-      font-family: inherit;
-      font-size: 1.05rem;
-      padding: 14px 16px;
-      border: 2px solid #f0e3d4;
-      border-radius: 14px;
-      background: #fff;
-      color: var(--ink);
-      outline: none;
+      width: 100%; font-family: inherit; font-size: 1.1rem;
+      padding: 14px 16px; border: 2px solid var(--line); border-radius: 14px;
+      background: #fff; color: var(--ink); outline: none;
       transition: border-color 0.15s, box-shadow 0.15s;
     }
+    input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring); }
+    .choices { display: flex; gap: 10px; }
+    .choice {
+      flex: 1; text-align: center; font-family: "Fredoka", sans-serif; font-weight: 600;
+      font-size: 1.05rem; padding: 13px 8px; border: 2px solid var(--line);
+      border-radius: 14px; background: #fff; color: var(--ink); cursor: pointer;
+      transition: all 0.12s;
+    }
+    .choice.selected { border-color: var(--accent); background: var(--pill); color: var(--accent-dark); }
+    button.cta {
+      width: 100%; font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 1.15rem;
+      color: #fff; background: var(--accent); border: none; border-radius: 14px;
+      padding: 16px; cursor: pointer; transition: background 0.15s, transform 0.05s;
+    }
+    button.cta:hover { background: var(--accent-dark); }
+    button.cta:active { transform: translateY(1px); }
+    button.cta:disabled { opacity: 0.5; cursor: default; }
 
-    input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 4px var(--ring);
+    .waiting { text-align: center; }
+    .waiting .big { font-family: "Fredoka", sans-serif; font-size: 1.5rem; font-weight: 700; margin: 4px 0 6px; }
+    .waiting .hint { color: var(--muted); font-weight: 700; margin: 0 0 20px; }
+    .spinner {
+      width: 46px; height: 46px; margin: 8px auto 20px; border-radius: 50%;
+      border: 5px solid var(--line); border-top-color: var(--accent);
+      animation: spin 0.9s linear infinite;
+    }
+    .count-badge {
+      display: inline-block; background: var(--pill); color: var(--accent-dark);
+      font-family: "Fredoka", sans-serif; font-weight: 600; border-radius: 999px;
+      padding: 8px 16px; font-size: 1rem;
     }
 
-    button {
-      font-family: "Fredoka", sans-serif;
-      font-weight: 600;
-      font-size: 1.05rem;
-      color: #fff;
-      background: var(--accent);
-      border: none;
-      border-radius: 14px;
-      padding: 0 20px;
-      cursor: pointer;
-      transition: background 0.15s, transform 0.05s;
-      white-space: nowrap;
+    .reveal { text-align: center; padding: 8px 0; }
+    .reveal .label { font-weight: 800; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; font-size: 0.8rem; }
+    .team-badge {
+      margin: 16px auto; width: 150px; height: 150px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem; box-shadow: 0 14px 34px rgba(0,0,0,0.18);
+      animation: pop-in 0.5s cubic-bezier(.2,1.4,.4,1);
     }
+    .team-name { font-family: "Fredoka", sans-serif; font-size: 2.2rem; font-weight: 700; margin: 4px 0; }
+    .team-sub { color: var(--muted); font-weight: 700; }
+    .me-pill { margin-top: 18px; display: inline-flex; gap: 8px; align-items: center; background: #fff; border: 2px solid var(--line); border-radius: 999px; padding: 8px 16px; font-weight: 800; }
 
-    button:hover { background: var(--accent-dark); }
-    button:active { transform: translateY(1px); }
-    button:disabled { opacity: 0.55; cursor: default; }
-
-    .count {
-      font-family: "Fredoka", sans-serif;
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      margin: 4px 2px 14px;
-    }
-    .count .num { font-size: 1.5rem; font-weight: 700; }
-    .count .lbl { color: var(--muted); font-weight: 600; }
-
-    ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    li {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--pill);
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-weight: 700;
-      font-size: 1.05rem;
-      animation: pop 0.25s ease;
-    }
-
-    li .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--accent);
-      flex: none;
-    }
-
-    .empty {
-      color: var(--muted);
-      font-weight: 600;
-      text-align: center;
-      padding: 18px 0;
-    }
-
-    @keyframes pop {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pop-in { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: scale(1); } }
     @media (prefers-reduced-motion: reduce) {
-      li { animation: none; }
+      .spinner { animation: none; } .team-badge { animation: none; }
     }
   </style>
 </head>
@@ -175,109 +98,181 @@
   <div class="container">
     <header>
       <h1>🎪 Cousinade</h1>
-      <p class="subtitle">Test de connexion — rejoins la partie !</p>
+      <p class="subtitle" id="subtitle">Rejoins la partie !</p>
     </header>
-
-    <div class="card">
-      <label for="nameInput">Ton prénom</label>
-      <div class="join-row">
-        <input id="nameInput" type="text" placeholder="Ex : Léa" autocomplete="off" maxlength="40" />
-        <button id="joinBtn">Rejoindre</button>
-      </div>
-    </div>
-
-    <div class="count">
-      <span class="num" id="count">0</span>
-      <span class="lbl">joueur·euse·s présent·e·s</span>
-    </div>
-
-    <ul id="playerList">
-      <li class="empty" id="emptyState">Personne pour l'instant… sois le·la premier·ère !</li>
-    </ul>
+    <div id="screen"></div>
   </div>
 
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
     const SUPABASE_URL = "https://bzspxqvbbdtefhugjogt.supabase.co";
     const SUPABASE_KEY = "sb_publishable_nAUDhRZoY7cd4FBRLACU5A_oule5R-0";
-
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const nameInput = document.getElementById("nameInput");
-    const joinBtn = document.getElementById("joinBtn");
-    const playerList = document.getElementById("playerList");
-    const emptyState = document.getElementById("emptyState");
-    const countEl = document.getElementById("count");
+    const TEAMS = {
+      1: { name: "Rouge", emoji: "🔴", hex: "#e23b2e", bgTop: "#ffd9d4", bgBottom: "#ffc1b8" },
+      2: { name: "Bleu",  emoji: "🔵", hex: "#2f6df0", bgTop: "#d6e4ff", bgBottom: "#bcd2ff" },
+      3: { name: "Vert",  emoji: "🟢", hex: "#1f9d63", bgTop: "#cdf2df", bgBottom: "#b2ead0" },
+      4: { name: "Jaune", emoji: "🟡", hex: "#e8a200", bgTop: "#ffeec2", bgBottom: "#ffe29b" },
+    };
 
-    let count = 0;
+    const STORAGE_KEY = "cousinade_player_id";
+    const screen = document.getElementById("screen");
+    const subtitle = document.getElementById("subtitle");
+    let myId = localStorage.getItem(STORAGE_KEY);
+    let myPlayer = null;
 
-    function renderCount() {
-      countEl.textContent = count;
-      emptyState.style.display = count === 0 ? "block" : "none";
+    function setBg(top, bottom) {
+      document.body.style.background = `linear-gradient(170deg, ${top}, ${bottom})`;
     }
+    function resetBg() { setBg("#ffe7b8", "#ffd2a6"); }
 
-    function addPlayerToList(player) {
-      const li = document.createElement("li");
-      li.dataset.id = player.id;
-      const dot = document.createElement("span");
-      dot.className = "dot";
-      const text = document.createElement("span");
-      text.textContent = player.name;
-      li.appendChild(dot);
-      li.appendChild(text);
-      playerList.appendChild(li);
-      count++;
-      renderCount();
-    }
+    // ---------- JOIN FORM ----------
+    function showJoinForm() {
+      resetBg();
+      subtitle.textContent = "Rejoins la partie !";
+      let sex = null, age = null;
+      screen.innerHTML = `
+        <div class="card">
+          <div class="field">
+            <label for="nameInput">Ton prénom</label>
+            <input id="nameInput" type="text" placeholder="Ex : Léa" autocomplete="off" maxlength="40" />
+          </div>
+          <div class="field">
+            <label>Tu es</label>
+            <div class="choices" id="sexChoices">
+              <div class="choice" data-val="H">Homme</div>
+              <div class="choice" data-val="F">Femme</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Catégorie</label>
+            <div class="choices" id="ageChoices">
+              <div class="choice" data-val="jeune">Jeune</div>
+              <div class="choice" data-val="senior">Sénior</div>
+            </div>
+          </div>
+          <button class="cta" id="joinBtn">C'est parti !</button>
+        </div>`;
 
-    async function loadPlayers() {
-      const { data, error } = await supabase
-        .from("players")
-        .select("*")
-        .order("created_at", { ascending: true });
-      if (error) {
-        console.error("Chargement impossible :", error);
-        return;
+      const nameInput = document.getElementById("nameInput");
+      const joinBtn = document.getElementById("joinBtn");
+
+      function wireChoices(containerId, setter) {
+        const container = document.getElementById(containerId);
+        container.querySelectorAll(".choice").forEach((el) => {
+          el.addEventListener("click", () => {
+            container.querySelectorAll(".choice").forEach((c) => c.classList.remove("selected"));
+            el.classList.add("selected");
+            setter(el.dataset.val);
+          });
+        });
       }
-      data.forEach(addPlayerToList);
+      wireChoices("sexChoices", (v) => (sex = v));
+      wireChoices("ageChoices", (v) => (age = v));
+
+      joinBtn.addEventListener("click", async () => {
+        const name = nameInput.value.trim();
+        if (!name) { nameInput.focus(); return; }
+        if (!sex) { alert("Choisis Homme ou Femme 🙂"); return; }
+        if (!age) { alert("Choisis Jeune ou Sénior 🙂"); return; }
+        joinBtn.disabled = true;
+        joinBtn.textContent = "On t'inscrit…";
+        const { data, error } = await supabase
+          .from("players")
+          .insert({ name, sex, age_group: age })
+          .select()
+          .single();
+        if (error) {
+          console.error(error);
+          alert("Oups, impossible de t'inscrire : " + error.message);
+          joinBtn.disabled = false;
+          joinBtn.textContent = "C'est parti !";
+          return;
+        }
+        myPlayer = data;
+        myId = data.id;
+        localStorage.setItem(STORAGE_KEY, myId);
+        showStatus();
+      });
     }
 
-    async function join() {
-      const name = nameInput.value.trim();
-      if (!name) {
-        nameInput.focus();
-        return;
-      }
-      joinBtn.disabled = true;
-      const { error } = await supabase.from("players").insert({ name });
-      if (error) {
-        console.error("Erreur en rejoignant :", error);
-        alert("Oups, impossible de rejoindre : " + error.message);
+    // ---------- WAITING ----------
+    async function showWaiting() {
+      resetBg();
+      subtitle.textContent = "Tu es bien inscrit·e !";
+      screen.innerHTML = `
+        <div class="card waiting">
+          <div class="spinner"></div>
+          <p class="big">Salut ${escapeHtml(myPlayer.name)} 👋</p>
+          <p class="hint">En attente du tirage des équipes…</p>
+          <span class="count-badge" id="countBadge">…</span>
+        </div>`;
+      updateCount();
+    }
+
+    async function updateCount() {
+      const badge = document.getElementById("countBadge");
+      if (!badge) return;
+      const { count } = await supabase.from("players").select("*", { count: "exact", head: true });
+      badge.textContent = (count ?? 0) + " cousin·e·s inscrit·e·s";
+    }
+
+    // ---------- TEAM REVEAL ----------
+    function showReveal() {
+      const t = TEAMS[myPlayer.team];
+      if (!t) return showWaiting();
+      setBg(t.bgTop, t.bgBottom);
+      subtitle.textContent = "Le tirage est fait !";
+      screen.innerHTML = `
+        <div class="card reveal">
+          <div class="label">Ton équipe</div>
+          <div class="team-badge" style="background:${t.hex}">${t.emoji}</div>
+          <div class="team-name" style="color:${t.hex}">Équipe ${t.name}</div>
+          <div class="team-sub">Que le meilleur clan gagne 🏆</div>
+          <div class="me-pill">👤 ${escapeHtml(myPlayer.name)}</div>
+        </div>`;
+    }
+
+    function showStatus() {
+      if (myPlayer && myPlayer.team) showReveal();
+      else showWaiting();
+    }
+
+    // ---------- REALTIME ----------
+    function subscribeRealtime() {
+      supabase
+        .channel("player-watch")
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "players" }, () => updateCount())
+        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "players" }, (p) => {
+          if (p.new.id === myId) { myPlayer = p.new; showStatus(); }
+        })
+        .on("postgres_changes", { event: "DELETE", schema: "public", table: "players" }, (p) => {
+          if (p.old.id === myId) {
+            localStorage.removeItem(STORAGE_KEY);
+            myId = null; myPlayer = null;
+            showJoinForm();
+          }
+        })
+        .subscribe();
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+
+    // ---------- INIT ----------
+    async function init() {
+      if (myId) {
+        const { data } = await supabase.from("players").select("*").eq("id", myId).maybeSingle();
+        if (data) { myPlayer = data; showStatus(); }
+        else { localStorage.removeItem(STORAGE_KEY); myId = null; showJoinForm(); }
       } else {
-        nameInput.value = "";
+        showJoinForm();
       }
-      joinBtn.disabled = false;
-      nameInput.focus();
+      subscribeRealtime();
     }
-
-    joinBtn.addEventListener("click", join);
-    nameInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") join();
-    });
-
-    // Temps réel : un nouveau joueur apparaît chez tout le monde
-    supabase
-      .channel("players-changes")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "players" },
-        (payload) => addPlayerToList(payload.new)
-      )
-      .subscribe();
-
-    renderCount();
-    loadPlayers();
+    init();
   </script>
 </body>
 </html>

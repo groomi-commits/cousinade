@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cousinade — Admin</title>
+  <title>Edward D'or — Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
@@ -11,7 +11,7 @@
     :root {
       --bg: #f4ede2; --card: #fffaf3; --ink: #3a2e22; --muted: #8a7a66;
       --accent: #ff6b4a; --accent-dark: #e8543a; --line: #ece0d0; --pill: #fff0e6;
-      --danger: #c0392b;
+      --danger: #c0392b; --green: #1f9d63;
     }
     * { box-sizing: border-box; }
     body {
@@ -19,7 +19,7 @@
       color: var(--ink); background: var(--bg);
       display: flex; justify-content: center; padding: 24px 16px 60px;
     }
-    .container { width: 100%; max-width: 620px; }
+    .container { width: 100%; max-width: 640px; }
     header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
     h1 { font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 1.7rem; margin: 0; }
     .tag { font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-dark); background: var(--pill); padding: 4px 10px; border-radius: 999px; }
@@ -38,7 +38,7 @@
     .choices { display: flex; gap: 8px; margin-bottom: 10px; }
     .choice {
       flex: 1; text-align: center; font-family: "Fredoka", sans-serif; font-weight: 600;
-      font-size: 0.98rem; padding: 10px 6px; border: 2px solid var(--line);
+      font-size: 0.95rem; padding: 10px 6px; border: 2px solid var(--line);
       border-radius: 11px; background: #fff; color: var(--ink); cursor: pointer; transition: all 0.12s;
     }
     .choice.selected { border-color: var(--accent); background: var(--pill); color: var(--accent-dark); }
@@ -51,8 +51,8 @@
     .players { display: flex; flex-wrap: wrap; gap: 8px; }
     .ptag { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1.5px solid var(--line); border-radius: 999px; padding: 7px 8px 7px 12px; font-weight: 700; font-size: 0.92rem; }
     .ptag .meta { color: var(--muted); font-weight: 700; font-size: 0.82rem; }
-    .ptag .x { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #f4e7df; color: var(--muted); cursor: pointer; font-weight: 800; font-size: 0.95rem; line-height: 1; }
-    .ptag .x:hover { background: #f6d3cc; color: var(--danger); }
+    .x { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #f4e7df; color: var(--muted); cursor: pointer; font-weight: 800; font-size: 0.95rem; line-height: 1; flex: none; }
+    .x:hover { background: #f6d3cc; color: var(--danger); }
 
     .btns { display: flex; flex-wrap: wrap; gap: 10px; }
     button {
@@ -62,28 +62,41 @@
     }
     button:hover { background: var(--accent-dark); }
     button:active { transform: translateY(1px); }
-    button:disabled { opacity: 0.5; cursor: default; }
+    button:disabled { opacity: 0.6; cursor: default; }
+    button.reveal { background: var(--green); }
+    button.reveal:hover { background: #18804f; }
     button.ghost { background: #fff; color: var(--ink); border: 2px solid var(--line); }
     button.ghost:hover { background: #faf4ec; }
     button.danger { background: #fff; color: var(--danger); border: 2px solid #f0cfc9; flex: none; min-width: auto; padding: 10px 14px; font-size: 0.88rem; }
     button.danger:hover { background: #fdeeec; }
 
+    .banner { border-radius: 12px; padding: 11px 14px; font-weight: 800; font-size: 0.92rem; margin-bottom: 14px; }
+    .banner.todo { background: #eef4ff; border: 1.5px solid #c7d9ff; color: #2b4d99; }
+    .banner.warn { background: #fff3e0; border: 1.5px solid #ffd49b; color: #8a5a00; }
+    .banner.ok { background: #e7f7ee; border: 1.5px solid #aee6c7; color: #14784a; }
+
     .teams { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .team { border-radius: 16px; padding: 14px; color: #fff; }
-    .team h3 { font-family: "Fredoka", sans-serif; margin: 0 0 4px; font-size: 1.2rem; }
-    .team .comp { font-weight: 800; font-size: 0.8rem; opacity: 0.92; margin-bottom: 10px; }
-    .team ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
-    .team li { background: rgba(255,255,255,0.22); border-radius: 9px; padding: 6px 10px; font-weight: 700; font-size: 0.92rem; }
+    .teamcard { background: #fff; border: 2px solid var(--line); border-radius: 16px; padding: 12px; }
+    .teamcard .head { display: flex; align-items: center; gap: 8px; font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 1.1rem; }
+    .swatch { width: 14px; height: 14px; border-radius: 50%; flex: none; }
+    .teamcard .comp { color: var(--muted); font-weight: 800; font-size: 0.76rem; margin: 4px 0 8px; }
+    .member { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 2px; border-top: 1px solid var(--line); }
+    .member:nth-of-type(1) { border-top: none; }
+    .member .nm { font-weight: 700; font-size: 0.92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ctrls { display: flex; align-items: center; gap: 6px; flex: none; }
+    .chips { display: flex; gap: 5px; }
+    .chip { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--line); transition: transform 0.08s; }
+    .chip:hover { transform: scale(1.18); }
+    .chip.current { box-shadow: 0 0 0 2px var(--ink); cursor: default; }
     .empty { color: var(--muted); font-weight: 700; text-align: center; padding: 14px 0; }
     .note { color: var(--muted); font-weight: 700; font-size: 0.88rem; margin-top: 10px; text-align: center; }
-    .warn { background: #fff3e0; border: 1.5px solid #ffd49b; color: #8a5a00; border-radius: 12px; padding: 10px 12px; font-weight: 700; font-size: 0.9rem; margin-bottom: 12px; }
-    @media (max-width: 440px) { .teams { grid-template-columns: 1fr; } }
+    @media (max-width: 460px) { .teams { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>🎪 Cousinade</h1>
+      <h1>🏆 Edward D'or</h1>
       <span class="tag">Admin</span>
     </header>
     <p class="sub">Tableau de bord — tirage des équipes</p>
@@ -98,7 +111,7 @@
       </div>
       <div class="choices" id="addAge">
         <div class="choice" data-val="jeune">Jeune</div>
-        <div class="choice" data-val="senior">Sénior</div>
+        <div class="choice" data-val="senior">Plus trop jeune (essaye de l'être)</div>
       </div>
       <button id="addBtn" style="width:100%">＋ Ajouter à la liste</button>
     </div>
@@ -127,15 +140,14 @@
     const sexLabel = (s) => (s === "H" ? "H" : s === "F" ? "F" : "?");
     const ageLabel = (a) => (a === "jeune" ? "Jeune" : a === "senior" ? "Sénior" : "?");
 
-    // ---------- ADD FORM (statique, monté une seule fois) ----------
+    // ---------- ADD FORM (statique) ----------
     let addSex = null, addAge = null;
     function wireChoiceGroup(id, setter) {
       const c = document.getElementById(id);
       c.querySelectorAll(".choice").forEach((el) => {
         el.addEventListener("click", () => {
           c.querySelectorAll(".choice").forEach((x) => x.classList.remove("selected"));
-          el.classList.add("selected");
-          setter(el.dataset.val);
+          el.classList.add("selected"); setter(el.dataset.val);
         });
       });
     }
@@ -147,20 +159,18 @@
       const name = addName.value.trim();
       if (!name) { addName.focus(); return; }
       if (!addSex) { alert("Choisis Homme ou Femme"); return; }
-      if (!addAge) { alert("Choisis Jeune ou Sénior"); return; }
+      if (!addAge) { alert("Choisis la catégorie d'âge"); return; }
       addBtn.disabled = true; addBtn.textContent = "Ajout…";
       const { error } = await supabase.from("players").insert({ name, sex: addSex, age_group: addAge });
       addBtn.disabled = false; addBtn.textContent = "＋ Ajouter à la liste";
       if (error) { alert("Erreur : " + error.message); return; }
-      addName.value = "";
-      addSex = null; addAge = null;
+      addName.value = ""; addSex = null; addAge = null;
       document.querySelectorAll("#addSex .choice, #addAge .choice").forEach((x) => x.classList.remove("selected"));
-      addName.focus();
-      load();
+      addName.focus(); load();
     });
     addName.addEventListener("keydown", (e) => { if (e.key === "Enter") addBtn.click(); });
 
-    // ---------- LOAD + RENDER (dynamique) ----------
+    // ---------- LOAD ----------
     async function load() {
       const { data, error } = await supabase.from("players").select("*").order("created_at", { ascending: true });
       if (error) { console.error(error); dyn.innerHTML = `<div class="card"><div class="empty">Erreur : ${escapeHtml(error.message)}</div></div>`; return; }
@@ -168,31 +178,50 @@
       render();
     }
 
-    function render() {
-      const total = players.length;
-      const assigned = players.some((p) => p.team);
-      const unplaced = players.filter((p) => !p.team);
-
+    function bucketsHtml() {
       const b = { "H-jeune": 0, "F-jeune": 0, "H-senior": 0, "F-senior": 0 };
       players.forEach((p) => { const k = `${p.sex}-${p.age_group}`; if (k in b) b[k]++; });
+      return `<div class="card">
+        <h2>Inscrits</h2>
+        <div class="buckets" style="margin-top:12px">
+          <div class="bucket"><span>🧑 Jeunes hommes</span><span class="n">${b["H-jeune"]}</span></div>
+          <div class="bucket"><span>👩 Jeunes femmes</span><span class="n">${b["F-jeune"]}</span></div>
+          <div class="bucket"><span>👴 Séniors hommes</span><span class="n">${b["H-senior"]}</span></div>
+          <div class="bucket"><span>👵 Séniors femmes</span><span class="n">${b["F-senior"]}</span></div>
+        </div>
+        <div class="total">Total : ${players.length} cousin·e·s</div>
+      </div>`;
+    }
 
-      let html = `
-        <div class="card">
-          <h2>Inscrits</h2>
-          <div class="buckets" style="margin-top:12px">
-            <div class="bucket"><span>🧑 Jeunes hommes</span><span class="n">${b["H-jeune"]}</span></div>
-            <div class="bucket"><span>👩 Jeunes femmes</span><span class="n">${b["F-jeune"]}</span></div>
-            <div class="bucket"><span>👴 Séniors hommes</span><span class="n">${b["H-senior"]}</span></div>
-            <div class="bucket"><span>👵 Séniors femmes</span><span class="n">${b["F-senior"]}</span></div>
-          </div>
-          <div class="total">Total : ${total} cousin·e·s</div>
-        </div>`;
-
-      const tagList = (arr) => arr.map((p) =>
+    function tagList(arr) {
+      return arr.map((p) =>
         `<span class="ptag">${escapeHtml(p.name)} <span class="meta">${sexLabel(p.sex)} · ${ageLabel(p.age_group)}</span><span class="x" data-del="${p.id}" data-name="${escapeHtml(p.name)}">✕</span></span>`
       ).join("");
+    }
 
-      if (!assigned) {
+    function memberHtml(p) {
+      const chips = [1,2,3,4].map((t) =>
+        `<span class="chip ${p.draft_team === t ? "current" : ""}" style="background:${TEAMS[t].hex}" ${p.draft_team === t ? "" : `data-move-id="${p.id}" data-move-team="${t}"`} title="${TEAMS[t].name}"></span>`
+      ).join("");
+      return `<div class="member">
+        <span class="nm">${escapeHtml(p.name)}</span>
+        <span class="ctrls">
+          <span class="chips">${chips}</span>
+          <span class="x" data-del="${p.id}" data-name="${escapeHtml(p.name)}">✕</span>
+        </span>
+      </div>`;
+    }
+
+    function render() {
+      const total = players.length;
+      const hasDraft = players.some((p) => p.draft_team != null);
+      const revealed = players.some((p) => p.team != null);
+      const pending = players.some((p) => (p.team ?? null) !== (p.draft_team ?? null));
+
+      let html = bucketsHtml();
+
+      if (!hasDraft) {
+        // ---- LOBBY ----
         html += `<div class="card">
           <h2>En attente du tirage</h2>
           <div class="players" style="margin-top:12px">${
@@ -206,26 +235,43 @@
           ${total > 0 && total < 4 ? `<div class="note">Il faut au moins 4 inscrits pour faire 4 équipes.</div>` : ""}
         </div>`;
       } else {
+        // ---- REVIEW (brouillon) ----
         const byTeam = { 1: [], 2: [], 3: [], 4: [] };
-        players.forEach((p) => { if (p.team) byTeam[p.team].push(p); });
+        const unplaced = [];
+        players.forEach((p) => { if (p.draft_team) byTeam[p.draft_team].push(p); else unplaced.push(p); });
+
+        let banner;
+        if (!revealed) banner = `<div class="banner todo">🔒 Brouillon — les joueurs ne voient pas encore leurs équipes. Ajuste si besoin, puis révèle.</div>`;
+        else if (pending) banner = `<div class="banner warn">✏️ Tu as modifié des équipes. Clique "Publier" pour mettre à jour ce que voient les joueurs.</div>`;
+        else banner = `<div class="banner ok">✅ Les joueurs voient leurs équipes (à jour).</div>`;
+
+        const teamsHtml = [1,2,3,4].map((t) => {
+          const list = byTeam[t];
+          const h = list.filter((p) => p.sex === "H").length, f = list.filter((p) => p.sex === "F").length;
+          const j = list.filter((p) => p.age_group === "jeune").length, s = list.filter((p) => p.age_group === "senior").length;
+          return `<div class="teamcard">
+            <div class="head"><span class="swatch" style="background:${TEAMS[t].hex}"></span>${TEAMS[t].name}</div>
+            <div class="comp">${list.length} joueur·s · ${h}H/${f}F · ${j}J/${s}S</div>
+            ${list.map(memberHtml).join("") || `<div class="empty" style="padding:8px 0">—</div>`}
+          </div>`;
+        }).join("");
+
+        const revealBtn = pending
+          ? `<button id="revealBtn" class="reveal">${revealed ? "🔄 Publier les changements" : "✅ Révéler aux joueurs"}</button>`
+          : `<button class="reveal" disabled>✓ Équipes à jour</button>`;
+
         html += `<div class="card">
-          <h2>Les 4 équipes</h2>
-          ${unplaced.length ? `<div class="warn" style="margin-top:10px">⚠️ ${unplaced.length} joueur·euse·s pas encore placé·e·s — relance le tirage pour les intégrer.</div>` : ""}
-          <div class="teams" style="margin-top:12px">${[1,2,3,4].map((t) => {
-            const list = byTeam[t];
-            const h = list.filter((p) => p.sex === "H").length;
-            const f = list.filter((p) => p.sex === "F").length;
-            const j = list.filter((p) => p.age_group === "jeune").length;
-            const s = list.filter((p) => p.age_group === "senior").length;
-            return `<div class="team" style="background:${TEAMS[t].hex}">
-              <h3>${TEAMS[t].emoji} ${TEAMS[t].name}</h3>
-              <div class="comp">${list.length} joueur·euse·s · ${h}H/${f}F · ${j} jeune·s/${s} sénior·s</div>
-              <ul>${list.map((p) => `<li>${escapeHtml(p.name)}</li>`).join("") || `<li>—</li>`}</ul>
-            </div>`;
-          }).join("")}</div>
-          ${unplaced.length ? `<h2 style="margin-top:16px">Pas encore placé·e·s</h2><div class="players" style="margin-top:10px">${tagList(unplaced)}</div>` : ""}
+          <h2>Les 4 équipes ${revealed ? "" : "(brouillon)"}</h2>
+          <p class="addhint">Clique un point de couleur pour déplacer quelqu'un.</p>
+          ${banner}
+          <div class="teams">${teamsHtml}</div>
+          ${unplaced.length ? `<h2 style="margin-top:16px">Pas encore dans une équipe</h2>
+            <div style="margin-top:8px">${unplaced.map(memberHtml).join("")}</div>` : ""}
           <div class="btns" style="margin-top:16px">
-            <button id="drawBtn">🔄 Refaire le tirage</button>
+            ${revealBtn}
+          </div>
+          <div class="btns" style="margin-top:10px">
+            <button id="drawBtn" class="ghost">🎲 Refaire le tirage</button>
             <button id="clearBtn" class="ghost">Annuler le tirage</button>
           </div>
         </div>`;
@@ -238,15 +284,12 @@
 
       dyn.innerHTML = html;
 
-      const drawBtn = document.getElementById("drawBtn");
-      if (drawBtn) drawBtn.addEventListener("click", runDraw);
-      const clearBtn = document.getElementById("clearBtn");
-      if (clearBtn) clearBtn.addEventListener("click", clearTeams);
-      const wipeBtn = document.getElementById("wipeBtn");
-      if (wipeBtn) wipeBtn.addEventListener("click", wipeAll);
-      dyn.querySelectorAll("[data-del]").forEach((el) => {
-        el.addEventListener("click", () => deletePlayer(el.dataset.del, el.dataset.name));
-      });
+      const drawBtn = document.getElementById("drawBtn"); if (drawBtn) drawBtn.addEventListener("click", runDraw);
+      const revealBtn = document.getElementById("revealBtn"); if (revealBtn) revealBtn.addEventListener("click", reveal);
+      const clearBtn = document.getElementById("clearBtn"); if (clearBtn) clearBtn.addEventListener("click", clearTeams);
+      const wipeBtn = document.getElementById("wipeBtn"); if (wipeBtn) wipeBtn.addEventListener("click", wipeAll);
+      dyn.querySelectorAll("[data-del]").forEach((el) => el.addEventListener("click", () => deletePlayer(el.dataset.del, el.dataset.name)));
+      dyn.querySelectorAll("[data-move-id]").forEach((el) => el.addEventListener("click", () => movePlayer(el.dataset.moveId, parseInt(el.dataset.moveTeam, 10))));
     }
 
     function shuffle(arr) {
@@ -267,16 +310,31 @@
       });
       const btn = document.getElementById("drawBtn");
       if (btn) { btn.disabled = true; btn.textContent = "Tirage en cours…"; }
-      const results = await Promise.all(assignments.map((a) => supabase.from("players").update({ team: a.team }).eq("id", a.id)));
+      const results = await Promise.all(assignments.map((a) => supabase.from("players").update({ draft_team: a.team }).eq("id", a.id)));
       const err = results.find((r) => r.error);
       if (err) alert("Erreur pendant le tirage : " + err.error.message);
       await load();
     }
 
+    async function movePlayer(id, team) {
+      const { error } = await supabase.from("players").update({ draft_team: team }).eq("id", id);
+      if (error) { alert("Erreur : " + error.message); return; }
+      await load();
+    }
+
+    async function reveal() {
+      const btn = document.getElementById("revealBtn");
+      if (btn) { btn.disabled = true; btn.textContent = "Publication…"; }
+      const toUpdate = players.filter((p) => (p.team ?? null) !== (p.draft_team ?? null));
+      const results = await Promise.all(toUpdate.map((p) => supabase.from("players").update({ team: p.draft_team }).eq("id", p.id)));
+      const err = results.find((r) => r.error);
+      if (err) alert("Erreur : " + err.error.message);
+      await load();
+    }
+
     async function clearTeams() {
       if (!confirm("Annuler le tirage et remettre tout le monde en attente ?")) return;
-      const ids = players.filter((p) => p.team).map((p) => p.id);
-      await Promise.all(ids.map((id) => supabase.from("players").update({ team: null }).eq("id", id)));
+      await Promise.all(players.map((p) => supabase.from("players").update({ team: null, draft_team: null }).eq("id", p.id)));
       await load();
     }
 

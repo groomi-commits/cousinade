@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cousinade — Test</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-top: #ffe7b8;
+      --bg-bottom: #ffd2a6;
+      --card: #fffaf3;
+      --ink: #3a2e22;
+      --muted: #8a7a66;
+      --accent: #ff6b4a;
+      --accent-dark: #e8543a;
+      --ring: rgba(255, 107, 74, 0.35);
+      --pill: #fff0e6;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Nunito", system-ui, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(170deg, var(--bg-top), var(--bg-bottom));
+      display: flex;
+      justify-content: center;
+      padding: 28px 18px 48px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 460px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      font-family: "Fredoka", sans-serif;
+      font-weight: 700;
+      font-size: 2.1rem;
+      margin: 0;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: 0 12px 30px rgba(120, 70, 30, 0.12);
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 10px;
+      font-size: 1.05rem;
+    }
+
+    .join-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    input {
+      flex: 1;
+      min-width: 0;
+      font-family: inherit;
+      font-size: 1.05rem;
+      padding: 14px 16px;
+      border: 2px solid #f0e3d4;
+      border-radius: 14px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--ring);
+    }
+
+    button {
+      font-family: "Fredoka", sans-serif;
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: 14px;
+      padding: 0 20px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.05s;
+      white-space: nowrap;
+    }
+
+    button:hover { background: var(--accent-dark); }
+    button:active { transform: translateY(1px); }
+    button:disabled { opacity: 0.55; cursor: default; }
+
+    .count {
+      font-family: "Fredoka", sans-serif;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin: 4px 2px 14px;
+    }
+    .count .num { font-size: 1.5rem; font-weight: 700; }
+    .count .lbl { color: var(--muted); font-weight: 600; }
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--pill);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      animation: pop 0.25s ease;
+    }
+
+    li .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex: none;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-weight: 600;
+      text-align: center;
+      padding: 18px 0;
+    }
+
+    @keyframes pop {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      li { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎪 Cousinade</h1>
+      <p class="subtitle">Test de connexion — rejoins la partie !</p>
+    </header>
+
+    <div class="card">
+      <label for="nameInput">Ton prénom</label>
+      <div class="join-row">
+        <input id="nameInput" type="text" placeholder="Ex : Léa" autocomplete="off" maxlength="40" />
+        <button id="joinBtn">Rejoindre</button>
+      </div>
+    </div>
+
+    <div class="count">
+      <span class="num" id="count">0</span>
+      <span class="lbl">joueur·euse·s présent·e·s</span>
+    </div>
+
+    <ul id="playerList">
+      <li class="empty" id="emptyState">Personne pour l'instant… sois le·la premier·ère !</li>
+    </ul>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL = "https://bzspxqvbbdtefhugjogt.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_nAUDhRZoY7cd4FBRLACU5A_oule5R-0";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const nameInput = document.getElementById("nameInput");
+    const joinBtn = document.getElementById("joinBtn");
+    const playerList = document.getElementById("playerList");
+    const emptyState = document.getElementById("emptyState");
+    const countEl = document.getElementById("count");
+
+    let count = 0;
+
+    function renderCount() {
+      countEl.textContent = count;
+      emptyState.style.display = count === 0 ? "block" : "none";
+    }
+
+    function addPlayerToList(player) {
+      const li = document.createElement("li");
+      li.dataset.id = player.id;
+      const dot = document.createElement("span");
+      dot.className = "dot";
+      const text = document.createElement("span");
+      text.textContent = player.name;
+      li.appendChild(dot);
+      li.appendChild(text);
+      playerList.appendChild(li);
+      count++;
+      renderCount();
+    }
+
+    async function loadPlayers() {
+      const { data, error } = await supabase
+        .from("players")
+        .select("*")
+        .order("created_at", { ascending: true });
+      if (error) {
+        console.error("Chargement impossible :", error);
+        return;
+      }
+      data.forEach(addPlayerToList);
+    }
+
+    async function join() {
+      const name = nameInput.value.trim();
+      if (!name) {
+        nameInput.focus();
+        return;
+      }
+      joinBtn.disabled = true;
+      const { error } = await supabase.from("players").insert({ name });
+      if (error) {
+        console.error("Erreur en rejoignant :", error);
+        alert("Oups, impossible de rejoindre : " + error.message);
+      } else {
+        nameInput.value = "";
+      }
+      joinBtn.disabled = false;
+      nameInput.focus();
+    }
+
+    joinBtn.addEventListener("click", join);
+    nameInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") join();
+    });
+
+    // Temps réel : un nouveau joueur apparaît chez tout le monde
+    supabase
+      .channel("players-changes")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "players" },
+        (payload) => addPlayerToList(payload.new)
+      )
+      .subscribe();
+
+    renderCount();
+    loadPlayers();
+  </script>
+</body>
+</html>

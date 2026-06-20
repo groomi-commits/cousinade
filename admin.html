@@ -8,81 +8,68 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    :root {
-      --bg: #f4ede2; --card: #fffaf3; --ink: #3a2e22; --muted: #8a7a66;
-      --accent: #ff6b4a; --accent-dark: #e8543a; --line: #ece0d0; --pill: #fff0e6;
-      --danger: #c0392b; --green: #1f9d63;
-    }
+    :root { --bg:#f4ede2; --card:#fffaf3; --ink:#3a2e22; --muted:#8a7a66; --accent:#ff6b4a; --accent-dark:#e8543a; --line:#ece0d0; --pill:#fff0e6; --danger:#c0392b; --green:#1f9d63; }
     * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; font-family: "Nunito", system-ui, sans-serif; color: var(--ink); background: var(--bg); display: flex; justify-content: center; padding: 24px 16px 60px; }
-    .container { width: 100%; max-width: 640px; }
-    header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
-    h1 { font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 1.7rem; margin: 0; }
-    .tag { font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-dark); background: var(--pill); padding: 4px 10px; border-radius: 999px; }
-    .sub { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
-
-    .card { background: var(--card); border-radius: 18px; padding: 18px; box-shadow: 0 8px 22px rgba(120,70,30,0.10); margin-bottom: 16px; }
-    .card h2 { font-family: "Fredoka", sans-serif; font-size: 1.05rem; margin: 0 0 4px; }
-    .addhint { color: var(--muted); font-weight: 700; font-size: 0.86rem; margin: 0 0 14px; }
-
-    input { width: 100%; font-family: inherit; font-size: 1.05rem; padding: 12px 14px; border: 2px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); outline: none; transition: border-color 0.15s, box-shadow 0.15s; margin-bottom: 10px; }
-    input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255,107,74,0.3); }
-    .choices { display: flex; gap: 8px; margin-bottom: 10px; }
-    .choice { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 0.95rem; padding: 10px 6px; border: 2px solid var(--line); border-radius: 11px; background: #fff; color: var(--ink); cursor: pointer; transition: all 0.12s; }
-    .choice.selected { border-color: var(--accent); background: var(--pill); color: var(--accent-dark); }
-
-    .buckets { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    .bucket { background: var(--pill); border-radius: 12px; padding: 10px 12px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
-    .bucket .n { font-family: "Fredoka", sans-serif; font-size: 1.2rem; color: var(--accent-dark); }
-    .total { text-align: center; font-family: "Fredoka", sans-serif; font-size: 1.05rem; margin-top: 12px; color: var(--muted); }
-
-    .players { display: flex; flex-wrap: wrap; gap: 8px; }
-    .ptag { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1.5px solid var(--line); border-radius: 999px; padding: 7px 8px 7px 12px; font-weight: 700; font-size: 0.92rem; }
-    .ptag .meta { color: var(--muted); font-weight: 700; font-size: 0.82rem; }
-    .x { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #f4e7df; color: var(--muted); cursor: pointer; font-weight: 800; font-size: 0.95rem; line-height: 1; flex: none; }
-    .x:hover { background: #f6d3cc; color: var(--danger); }
-
-    .btns { display: flex; flex-wrap: wrap; gap: 10px; }
-    button { font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 1rem; color: #fff; background: var(--accent); border: none; border-radius: 12px; padding: 13px 18px; cursor: pointer; transition: background 0.15s, transform 0.05s; flex: 1; min-width: 150px; }
-    button:hover { background: var(--accent-dark); }
-    button:active { transform: translateY(1px); }
-    button:disabled { opacity: 0.6; cursor: default; }
-    button.reveal { background: var(--green); } button.reveal:hover { background: #18804f; }
-    button.ghost { background: #fff; color: var(--ink); border: 2px solid var(--line); } button.ghost:hover { background: #faf4ec; }
-    button.danger { background: #fff; color: var(--danger); border: 2px solid #f0cfc9; flex: none; min-width: auto; padding: 10px 14px; font-size: 0.88rem; } button.danger:hover { background: #fdeeec; }
-
-    .banner { border-radius: 12px; padding: 11px 14px; font-weight: 800; font-size: 0.92rem; margin-bottom: 14px; }
-    .banner.todo { background: #eef4ff; border: 1.5px solid #c7d9ff; color: #2b4d99; }
-    .banner.warn { background: #fff3e0; border: 1.5px solid #ffd49b; color: #8a5a00; }
-    .banner.ok { background: #e7f7ee; border: 1.5px solid #aee6c7; color: #14784a; }
-
-    .teams { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .teamcard { background: #fff; border: 2px solid var(--line); border-radius: 16px; padding: 12px; }
-    .teamcard .head { display: flex; align-items: center; gap: 8px; font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 1.05rem; }
-    .teamcard .head .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .swatch { width: 14px; height: 14px; border-radius: 50%; flex: none; }
-    .teamcard .comp { color: var(--muted); font-weight: 800; font-size: 0.76rem; margin: 4px 0 8px; }
-    .member { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 2px; border-top: 1px solid var(--line); }
-    .member:nth-of-type(1) { border-top: none; }
-    .member .nm { font-weight: 700; font-size: 0.92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .ctrls { display: flex; align-items: center; gap: 6px; flex: none; }
-    .chips { display: flex; gap: 5px; }
-    .chip { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--line); transition: transform 0.08s; }
-    .chip:hover { transform: scale(1.18); }
-    .chip.current { box-shadow: 0 0 0 2px var(--ink); cursor: default; }
-    .capselect { display: flex; align-items: center; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); font-weight: 800; font-size: 0.82rem; color: var(--muted); }
-    .capselect select { flex: 1; font-family: inherit; font-weight: 700; font-size: 0.88rem; padding: 7px 8px; border: 1.5px solid var(--line); border-radius: 9px; background: #fff; color: var(--ink); margin: 0; }
-    .empty { color: var(--muted); font-weight: 700; text-align: center; padding: 14px 0; }
-    .note { color: var(--muted); font-weight: 700; font-size: 0.88rem; margin-top: 10px; text-align: center; }
-    @media (max-width: 460px) { .teams { grid-template-columns: 1fr; } }
+    body { margin:0; min-height:100vh; font-family:"Nunito",system-ui,sans-serif; color:var(--ink); background:var(--bg); display:flex; justify-content:center; padding:24px 16px 60px; }
+    .container { width:100%; max-width:640px; }
+    header { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px; }
+    h1 { font-family:"Fredoka",sans-serif; font-weight:700; font-size:1.7rem; margin:0; }
+    .tag { font-family:"Fredoka",sans-serif; font-weight:600; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; color:var(--accent-dark); background:var(--pill); padding:4px 10px; border-radius:999px; }
+    .sub { color:var(--muted); font-weight:700; margin:0 0 18px; }
+    .card { background:var(--card); border-radius:18px; padding:18px; box-shadow:0 8px 22px rgba(120,70,30,0.10); margin-bottom:16px; }
+    .card h2 { font-family:"Fredoka",sans-serif; font-size:1.05rem; margin:0 0 4px; }
+    .addhint { color:var(--muted); font-weight:700; font-size:0.86rem; margin:0 0 14px; }
+    input { width:100%; font-family:inherit; font-size:1.05rem; padding:12px 14px; border:2px solid var(--line); border-radius:12px; background:#fff; color:var(--ink); outline:none; transition:border-color .15s,box-shadow .15s; margin-bottom:10px; }
+    input:focus { border-color:var(--accent); box-shadow:0 0 0 4px rgba(255,107,74,0.3); }
+    .choices { display:flex; gap:8px; margin-bottom:10px; }
+    .choices.wrap { flex-wrap:wrap; }
+    .choice { flex:1; display:flex; align-items:center; justify-content:center; text-align:center; font-family:"Fredoka",sans-serif; font-weight:600; font-size:0.95rem; padding:10px 6px; border:2px solid var(--line); border-radius:11px; background:#fff; color:var(--ink); cursor:pointer; transition:all .12s; }
+    .choices.wrap .choice { flex:1 1 30%; min-width:88px; }
+    .choice.selected { border-color:var(--accent); background:var(--pill); color:var(--accent-dark); }
+    .buckets { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+    .bucket { background:var(--pill); border-radius:12px; padding:10px 12px; font-weight:800; display:flex; justify-content:space-between; align-items:center; }
+    .bucket .n { font-family:"Fredoka",sans-serif; font-size:1.2rem; color:var(--accent-dark); }
+    .famtally { margin-top:12px; padding-top:12px; border-top:1px dashed var(--line); color:var(--muted); font-weight:800; font-size:0.85rem; text-align:center; }
+    .total { text-align:center; font-family:"Fredoka",sans-serif; font-size:1.05rem; margin-top:10px; color:var(--muted); }
+    .players { display:flex; flex-wrap:wrap; gap:8px; }
+    .ptag { display:inline-flex; align-items:center; gap:8px; background:#fff; border:1.5px solid var(--line); border-radius:999px; padding:7px 8px 7px 12px; font-weight:700; font-size:0.92rem; }
+    .ptag .meta { color:var(--muted); font-weight:700; font-size:0.82rem; }
+    .x { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:#f4e7df; color:var(--muted); cursor:pointer; font-weight:800; font-size:0.95rem; line-height:1; flex:none; }
+    .x:hover { background:#f6d3cc; color:var(--danger); }
+    .btns { display:flex; flex-wrap:wrap; gap:10px; }
+    button { font-family:"Fredoka",sans-serif; font-weight:600; font-size:1rem; color:#fff; background:var(--accent); border:none; border-radius:12px; padding:13px 18px; cursor:pointer; transition:background .15s,transform .05s; flex:1; min-width:150px; }
+    button:hover { background:var(--accent-dark); } button:active { transform:translateY(1px); } button:disabled { opacity:0.6; cursor:default; }
+    button.reveal { background:var(--green); } button.reveal:hover { background:#18804f; }
+    button.ghost { background:#fff; color:var(--ink); border:2px solid var(--line); } button.ghost:hover { background:#faf4ec; }
+    button.danger { background:#fff; color:var(--danger); border:2px solid #f0cfc9; flex:none; min-width:auto; padding:10px 14px; font-size:0.88rem; } button.danger:hover { background:#fdeeec; }
+    .banner { border-radius:12px; padding:11px 14px; font-weight:800; font-size:0.92rem; margin-bottom:14px; }
+    .banner.todo { background:#eef4ff; border:1.5px solid #c7d9ff; color:#2b4d99; }
+    .banner.warn { background:#fff3e0; border:1.5px solid #ffd49b; color:#8a5a00; }
+    .banner.ok { background:#e7f7ee; border:1.5px solid #aee6c7; color:#14784a; }
+    .teams { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+    .teamcard { background:#fff; border:2px solid var(--line); border-radius:16px; padding:12px; }
+    .teamcard .head { display:flex; align-items:center; gap:8px; font-family:"Fredoka",sans-serif; font-weight:700; font-size:1.05rem; }
+    .teamcard .head .nm { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .swatch { width:14px; height:14px; border-radius:50%; flex:none; }
+    .teamcard .comp { color:var(--muted); font-weight:800; font-size:0.76rem; margin:4px 0 8px; }
+    .member { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 2px; border-top:1px solid var(--line); }
+    .member:nth-of-type(1) { border-top:none; }
+    .member .nm { font-weight:700; font-size:0.92rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .member .fam { color:var(--muted); font-weight:700; font-size:0.76rem; }
+    .ctrls { display:flex; align-items:center; gap:6px; flex:none; }
+    .chips { display:flex; gap:5px; }
+    .chip { width:18px; height:18px; border-radius:50%; cursor:pointer; border:2px solid #fff; box-shadow:0 0 0 1px var(--line); transition:transform .08s; }
+    .chip:hover { transform:scale(1.18); } .chip.current { box-shadow:0 0 0 2px var(--ink); cursor:default; }
+    .capselect { display:flex; align-items:center; gap:6px; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); font-weight:800; font-size:0.82rem; color:var(--muted); }
+    .capselect select { flex:1; font-family:inherit; font-weight:700; font-size:0.88rem; padding:7px 8px; border:1.5px solid var(--line); border-radius:9px; background:#fff; color:var(--ink); margin:0; }
+    .empty { color:var(--muted); font-weight:700; text-align:center; padding:14px 0; }
+    .note { color:var(--muted); font-weight:700; font-size:0.88rem; margin-top:10px; text-align:center; }
+    @media (max-width:460px) { .teams { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>🏆 Edward D'or</h1>
-      <span class="tag">Admin</span>
-    </header>
+    <header><h1>🏆 Edward D'or</h1><span class="tag">Admin</span></header>
     <p class="sub">Tableau de bord — tirage des équipes</p>
 
     <div class="card" id="addCard">
@@ -97,6 +84,7 @@
         <div class="choice" data-val="jeune">Jeune</div>
         <div class="choice" data-val="senior">Plus trop jeune (essaye de l'être)</div>
       </div>
+      <div class="choices wrap" id="addFam"></div>
       <button id="addBtn" style="width:100%">＋ Ajouter à la liste</button>
     </div>
 
@@ -110,22 +98,30 @@
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const TEAMS = {
-      1: { name: "Rouge", emoji: "🔴", hex: "#e23b2e" },
-      2: { name: "Bleu",  emoji: "🔵", hex: "#2f6df0" },
-      3: { name: "Vert",  emoji: "🟢", hex: "#1f9d63" },
-      4: { name: "Jaune", emoji: "🟡", hex: "#e8a200" },
+      1: { name:"Rouge", emoji:"🔴", hex:"#e23b2e" },
+      2: { name:"Bleu",  emoji:"🔵", hex:"#2f6df0" },
+      3: { name:"Vert",  emoji:"🟢", hex:"#1f9d63" },
+      4: { name:"Jaune", emoji:"🟡", hex:"#e8a200" },
     };
+    const FAMILIES = [
+      { val:"MOUDA", label:"Mouda" }, { val:"POIRIER", label:"Poirier" },
+      { val:"BOUVIER", label:"Bouvier" }, { val:"DOUKHAN/DAINNE", label:"Doukhan/Dainne" },
+      { val:"AUTRE", label:"Autre" },
+    ];
+    const famLabel = (v) => { const f = FAMILIES.find((x) => x.val === v); return f ? f.label : (v || "?"); };
+
     const dyn = document.getElementById("dynamic");
     let players = [];
     let teamsData = {};
 
-    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
     const sexLabel = (s) => (s === "H" ? "H" : s === "F" ? "F" : "?");
     const ageLabel = (a) => (a === "jeune" ? "Jeune" : a === "senior" ? "Sénior" : "?");
     const teamName = (t) => (teamsData[t] && teamsData[t].name && teamsData[t].name.trim()) ? teamsData[t].name : `Équipe ${TEAMS[t].name}`;
 
     // ---------- ADD FORM ----------
-    let addSex = null, addAge = null;
+    document.getElementById("addFam").innerHTML = FAMILIES.map((f) => `<div class="choice" data-val="${f.val}">${f.label}</div>`).join("");
+    let addSex = null, addAge = null, addFam = null;
     function wireChoiceGroup(id, setter) {
       const c = document.getElementById(id);
       c.querySelectorAll(".choice").forEach((el) => el.addEventListener("click", () => {
@@ -135,6 +131,7 @@
     }
     wireChoiceGroup("addSex", (v) => (addSex = v));
     wireChoiceGroup("addAge", (v) => (addAge = v));
+    wireChoiceGroup("addFam", (v) => (addFam = v));
     const addName = document.getElementById("addName");
     const addBtn = document.getElementById("addBtn");
     addBtn.addEventListener("click", async () => {
@@ -142,12 +139,13 @@
       if (!name) { addName.focus(); return; }
       if (!addSex) { alert("Choisis Homme ou Femme"); return; }
       if (!addAge) { alert("Choisis la catégorie d'âge"); return; }
+      if (!addFam) { alert("Choisis la famille"); return; }
       addBtn.disabled = true; addBtn.textContent = "Ajout…";
-      const { error } = await supabase.from("players").insert({ name, sex: addSex, age_group: addAge });
+      const { error } = await supabase.from("players").insert({ name, sex:addSex, age_group:addAge, family:addFam });
       addBtn.disabled = false; addBtn.textContent = "＋ Ajouter à la liste";
       if (error) { alert("Erreur : " + error.message); return; }
-      addName.value = ""; addSex = null; addAge = null;
-      document.querySelectorAll("#addSex .choice, #addAge .choice").forEach((x) => x.classList.remove("selected"));
+      addName.value = ""; addSex = null; addAge = null; addFam = null;
+      document.querySelectorAll("#addSex .choice, #addAge .choice, #addFam .choice").forEach((x) => x.classList.remove("selected"));
       addName.focus(); load();
     });
     addName.addEventListener("keydown", (e) => { if (e.key === "Enter") addBtn.click(); });
@@ -165,8 +163,9 @@
     }
 
     function bucketsHtml() {
-      const b = { "H-jeune": 0, "F-jeune": 0, "H-senior": 0, "F-senior": 0 };
+      const b = { "H-jeune":0, "F-jeune":0, "H-senior":0, "F-senior":0 };
       players.forEach((p) => { const k = `${p.sex}-${p.age_group}`; if (k in b) b[k]++; });
+      const famCounts = FAMILIES.map((f) => `${f.label} ${players.filter((p) => p.family === f.val).length}`).join(" · ");
       return `<div class="card">
         <h2>Inscrits</h2>
         <div class="buckets" style="margin-top:12px">
@@ -175,17 +174,18 @@
           <div class="bucket"><span>👴 Séniors hommes</span><span class="n">${b["H-senior"]}</span></div>
           <div class="bucket"><span>👵 Séniors femmes</span><span class="n">${b["F-senior"]}</span></div>
         </div>
+        <div class="famtally">👪 ${famCounts}</div>
         <div class="total">Total : ${players.length} cousin·e·s</div>
       </div>`;
     }
     function tagList(arr) {
-      return arr.map((p) => `<span class="ptag">${escapeHtml(p.name)} <span class="meta">${sexLabel(p.sex)} · ${ageLabel(p.age_group)}</span><span class="x" data-del="${p.id}" data-name="${escapeHtml(p.name)}">✕</span></span>`).join("");
+      return arr.map((p) => `<span class="ptag">${escapeHtml(p.name)} <span class="meta">${sexLabel(p.sex)} · ${ageLabel(p.age_group)} · ${escapeHtml(famLabel(p.family))}</span><span class="x" data-del="${p.id}" data-name="${escapeHtml(p.name)}">✕</span></span>`).join("");
     }
     function memberHtml(p, captainId) {
       const isCap = captainId && p.id === captainId;
       const chips = [1,2,3,4].map((t) => `<span class="chip ${p.draft_team === t ? "current" : ""}" style="background:${TEAMS[t].hex}" ${p.draft_team === t ? "" : `data-move-id="${p.id}" data-move-team="${t}"`} title="${TEAMS[t].name}"></span>`).join("");
       return `<div class="member">
-        <span class="nm">${isCap ? "👑 " : ""}${escapeHtml(p.name)}</span>
+        <span class="nm">${isCap ? "👑 " : ""}${escapeHtml(p.name)} <span class="fam">${escapeHtml(famLabel(p.family))}</span></span>
         <span class="ctrls"><span class="chips">${chips}</span><span class="x" data-del="${p.id}" data-name="${escapeHtml(p.name)}">✕</span></span>
       </div>`;
     }
@@ -206,7 +206,7 @@
           ${total > 0 && total < 4 ? `<div class="note">Il faut au moins 4 inscrits pour faire 4 équipes.</div>` : ""}
         </div>`;
       } else {
-        const byTeam = { 1: [], 2: [], 3: [], 4: [] };
+        const byTeam = { 1:[], 2:[], 3:[], 4:[] };
         const unplaced = [];
         players.forEach((p) => { if (p.draft_team) byTeam[p.draft_team].push(p); else unplaced.push(p); });
 
@@ -253,7 +253,6 @@
       </div>`;
 
       dyn.innerHTML = html;
-
       const drawBtn = document.getElementById("drawBtn"); if (drawBtn) drawBtn.addEventListener("click", runDraw);
       const revealBtn = document.getElementById("revealBtn"); if (revealBtn) revealBtn.addEventListener("click", reveal);
       const clearBtn = document.getElementById("clearBtn"); if (clearBtn) clearBtn.addEventListener("click", clearTeams);
@@ -267,13 +266,24 @@
     function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
     async function runDraw() {
+      // Priorité sexe + âge (équilibre serré), puis famille comme critère de départage.
       const buckets = {};
       players.forEach((p) => { const k = `${p.sex}-${p.age_group}`; (buckets[k] = buckets[k] || []).push(p); });
-      const assignments = []; let start = 0;
-      Object.values(buckets).forEach((bucket) => {
-        const arr = shuffle(bucket);
-        arr.forEach((p, i) => assignments.push({ id: p.id, team: ((start + i) % 4) + 1 }));
-        start = (start + arr.length) % 4;
+      const arrays = Object.values(buckets).sort((a, b) => b.length - a.length);
+      const teamMembers = { 1: [], 2: [], 3: [], 4: [] };
+      const famCount = { 1: {}, 2: {}, 3: {}, 4: {} };
+      const assignments = [];
+      arrays.forEach((bucket) => {
+        const members = shuffle(bucket);
+        const bc = { 1: 0, 2: 0, 3: 0, 4: 0 };
+        members.forEach((p) => {
+          const fam = p.family || "NA";
+          const t = [1, 2, 3, 4]
+            .map((id) => ({ id, bc: bc[id], fc: famCount[id][fam] || 0, size: teamMembers[id].length, r: Math.random() }))
+            .sort((a, b) => a.bc - b.bc || a.fc - b.fc || a.size - b.size || a.r - b.r)[0].id;
+          teamMembers[t].push(p); bc[t]++; famCount[t][fam] = (famCount[t][fam] || 0) + 1;
+          assignments.push({ id: p.id, team: t });
+        });
       });
       const btn = document.getElementById("drawBtn");
       if (btn) { btn.disabled = true; btn.textContent = "Tirage en cours…"; }
@@ -330,11 +340,9 @@
       .on("postgres_changes", { event: "*", schema: "public", table: "players" }, () => load())
       .on("postgres_changes", { event: "*", schema: "public", table: "teams" }, () => load())
       .subscribe();
-
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") load(); });
     window.addEventListener("focus", load);
     window.addEventListener("online", load);
-
     load();
   </script>
 </body>

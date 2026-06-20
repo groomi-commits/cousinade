@@ -33,12 +33,14 @@
     }
     input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring); }
     .choices { display: flex; gap: 10px; }
+    .choices.wrap { flex-wrap: wrap; gap: 8px; }
     .choice {
       flex: 1; display: flex; align-items: center; justify-content: center; text-align: center;
       font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 1.05rem; padding: 13px 8px;
       border: 2px solid var(--line); border-radius: 14px; background: #fff; color: var(--ink);
       cursor: pointer; transition: all 0.12s;
     }
+    .choices.wrap .choice { flex: 1 1 30%; min-width: 92px; font-size: 0.98rem; padding: 12px 8px; }
     .choice.selected { border-color: var(--accent); background: var(--pill); color: var(--accent-dark); }
     button.cta {
       width: 100%; font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 1.15rem;
@@ -64,11 +66,14 @@
 
     .captain-box { margin-top: 22px; padding-top: 20px; border-top: 2px dashed var(--line); }
     .captain-badge { font-family: "Fredoka", sans-serif; font-weight: 700; color: var(--accent-dark); background: var(--pill); display: inline-block; padding: 7px 16px; border-radius: 999px; margin-bottom: 14px; }
-    .captain-box .row { display: flex; gap: 8px; }
-    .captain-box input { flex: 1; min-width: 0; font-size: 1rem; padding: 12px 14px; }
-    .captain-box button { font-family: "Fredoka", sans-serif; font-weight: 600; color: #fff; background: var(--accent); border: none; border-radius: 14px; padding: 0 18px; cursor: pointer; white-space: nowrap; }
-    .captain-box button:hover { background: var(--accent-dark); }
-    .saved { color: #1f9d63; font-weight: 800; font-size: 0.9rem; margin-top: 8px; min-height: 1.1em; }
+    .chef-panel { background: var(--pill); border-radius: 16px; padding: 16px; }
+    .chef-panel .lbl { font-weight: 800; font-size: 0.92rem; color: var(--ink); margin-bottom: 10px; text-align: left; }
+    .chef-panel .row { display: flex; gap: 10px; }
+    .chef-panel input { flex: 1; min-width: 0; font-size: 1rem; padding: 12px 14px; }
+    .chef-panel button { font-family: "Fredoka", sans-serif; font-weight: 600; color: #fff; background: var(--accent); border: none; border-radius: 14px; padding: 0 20px; cursor: pointer; white-space: nowrap; }
+    .chef-panel button:hover { background: var(--accent-dark); }
+    .chef-panel button:disabled { opacity: 0.55; }
+    .saved { color: #1f9d63; font-weight: 800; font-size: 0.9rem; margin-top: 10px; min-height: 1.1em; text-align: left; }
 
     @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes pop-in { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: scale(1); } }
@@ -96,6 +101,13 @@
       3: { name: "Vert",  emoji: "🟢", hex: "#1f9d63", bgTop: "#cdf2df", bgBottom: "#b2ead0" },
       4: { name: "Jaune", emoji: "🟡", hex: "#e8a200", bgTop: "#ffeec2", bgBottom: "#ffe29b" },
     };
+    const FAMILIES = [
+      { val: "MOUDA", label: "Mouda" },
+      { val: "POIRIER", label: "Poirier" },
+      { val: "BOUVIER", label: "Bouvier" },
+      { val: "DOUKHAN/DAINNE", label: "Doukhan/Dainne" },
+      { val: "AUTRE", label: "Autre" },
+    ];
 
     const STORAGE_KEY = "cousinade_player_id";
     const screen = document.getElementById("screen");
@@ -108,11 +120,11 @@
     function resetBg() { setBg("#ffe7b8", "#ffd2a6"); }
     function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 
-    // ---------- JOIN FORM ----------
     function showJoinForm() {
       resetBg();
       subtitle.textContent = "Rejoins la partie !";
-      let sex = null, age = null;
+      let sex = null, age = null, fam = null;
+      const famHtml = FAMILIES.map((f) => `<div class="choice" data-val="${f.val}">${f.label}</div>`).join("");
       screen.innerHTML = `
         <div class="card">
           <div class="field">
@@ -133,6 +145,10 @@
               <div class="choice" data-val="senior">Plus trop jeune (essaye de l'être)</div>
             </div>
           </div>
+          <div class="field">
+            <label>Ta famille</label>
+            <div class="choices wrap" id="famChoices">${famHtml}</div>
+          </div>
           <button class="cta" id="joinBtn">C'est parti !</button>
         </div>`;
       const nameInput = document.getElementById("nameInput");
@@ -146,20 +162,21 @@
       }
       wire("sexChoices", (v) => (sex = v));
       wire("ageChoices", (v) => (age = v));
+      wire("famChoices", (v) => (fam = v));
       joinBtn.addEventListener("click", async () => {
         const name = nameInput.value.trim();
         if (!name) { nameInput.focus(); return; }
         if (!sex) { alert("Choisis Homme ou Femme 🙂"); return; }
         if (!age) { alert("Choisis ta catégorie 🙂"); return; }
+        if (!fam) { alert("Choisis ta famille 🙂"); return; }
         joinBtn.disabled = true; joinBtn.textContent = "On t'inscrit…";
-        const { data, error } = await supabase.from("players").insert({ name, sex, age_group: age }).select().single();
+        const { data, error } = await supabase.from("players").insert({ name, sex, age_group: age, family: fam }).select().single();
         if (error) { alert("Oups : " + error.message); joinBtn.disabled = false; joinBtn.textContent = "C'est parti !"; return; }
         myPlayer = data; myId = data.id; localStorage.setItem(STORAGE_KEY, myId);
         showStatus();
       });
     }
 
-    // ---------- WAITING ----------
     function showWaiting() {
       resetBg();
       subtitle.textContent = "Tu es bien inscrit·e !";
@@ -179,7 +196,6 @@
       badge.textContent = (count ?? 0) + " cousin·e·s inscrit·e·s";
     }
 
-    // ---------- TEAM REVEAL ----------
     async function loadMyTeam() {
       if (!myPlayer || !myPlayer.team) { myTeam = null; return; }
       const { data } = await supabase.from("teams").select("*").eq("id", myPlayer.team).maybeSingle();
@@ -195,17 +211,18 @@
       const bigName = custom ? escapeHtml(myTeam.name) : `Équipe ${t.name}`;
       const subName = custom ? `Équipe ${t.name}` : "Que le meilleur clan gagne 🏆";
       const isCaptain = myTeam && myTeam.captain_id === myId;
-
       const captainHtml = isCaptain ? `
         <div class="captain-box">
           <div class="captain-badge">👑 Tu es le chef !</div>
-          <div class="row">
-            <input id="teamNameInput" type="text" maxlength="30" placeholder="Nom de l'équipe" value="${custom ? escapeHtml(myTeam.name) : ""}" />
-            <button id="renameBtn">Valider</button>
+          <div class="chef-panel">
+            <div class="lbl">Donne un nom à ton équipe</div>
+            <div class="row">
+              <input id="teamNameInput" type="text" maxlength="30" placeholder="Ex : Les Bisons" value="${custom ? escapeHtml(myTeam.name) : ""}" />
+              <button id="renameBtn">Valider</button>
+            </div>
+            <div class="saved" id="savedMsg"></div>
           </div>
-          <div class="saved" id="savedMsg"></div>
         </div>` : "";
-
       screen.innerHTML = `
         <div class="card reveal">
           <div class="label">Ton équipe</div>
@@ -215,7 +232,6 @@
           <div class="me-pill">👤 ${escapeHtml(myPlayer.name)}</div>
           ${captainHtml}
         </div>`;
-
       if (isCaptain) {
         const input = document.getElementById("teamNameInput");
         const btn = document.getElementById("renameBtn");
@@ -239,7 +255,6 @@
       else showWaiting();
     }
 
-    // ---------- REALTIME ----------
     function subscribeRealtime() {
       supabase.channel("player-watch")
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "players" }, () => updateCount())
@@ -251,7 +266,6 @@
         })
         .on("postgres_changes", { event: "UPDATE", schema: "public", table: "teams" }, (p) => {
           if (myPlayer && myPlayer.team && p.new.id === myPlayer.team) {
-            // Ne pas écraser pendant que le chef tape : on ne re-render que si le focus n'est pas sur l'input
             const typing = document.activeElement && document.activeElement.id === "teamNameInput";
             myTeam = p.new;
             if (!typing) showReveal();

@@ -153,8 +153,8 @@
 
     async function load() {
       const [pRes, tRes, gRes, sRes] = await Promise.all([
-        supabase.from("players").select("*").order("created_at", { ascending: true }),
-        supabase.from("teams").select("*"),
+        supabase.from("players").select("id,name,sex,age_group,family,team,draft_team,created_at").order("created_at", { ascending: true }),
+        supabase.from("teams").select("id,name,captain_id,selected").order("id"),
         supabase.from("games").select("*").order("position", { ascending: true }),
         supabase.from("scores").select("*"),
       ]);

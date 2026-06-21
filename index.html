@@ -117,6 +117,27 @@
     .secret-hint { color:var(--muted); font-weight:700; font-size:0.84rem; }
     .secret-inline { background:var(--pill); border-radius:10px; padding:10px 12px; font-weight:800; margin:0 0 12px; text-align:left; color:var(--accent-dark); }
 
+    .vote-grid { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+    .vchip { display:inline-flex; align-items:center; gap:8px; padding:8px 14px 8px 8px; border:2px solid var(--line); border-radius:999px; font-weight:800; cursor:pointer; background:#fff; }
+    .vchip.sel { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .vchip .av { width:26px; height:26px; border-radius:50%; object-fit:cover; flex:none; background:var(--pill); display:inline-flex; align-items:center; justify-content:center; font-size:0.85rem; }
+    .vote-chosen { display:flex; align-items:center; gap:8px; font-size:1.05rem; }
+    .vchange { margin-left:auto; background:none; border:none; color:var(--accent-dark); font-weight:800; cursor:pointer; text-decoration:underline; }
+    .rev-add { font-weight:800; color:var(--accent-dark); font-size:0.78rem; margin:0 4px; flex:none; }
+    .award-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--line); }
+    .award-row:last-child { border-bottom:none; }
+    .award-win { display:inline-flex; align-items:center; gap:6px; font-weight:800; margin-right:8px; }
+    .award-win .av { width:24px; height:24px; border-radius:50%; object-fit:cover; flex:none; background:var(--pill); display:inline-flex; align-items:center; justify-content:center; font-size:0.78rem; }
+    .prow { display:flex; align-items:center; gap:12px; padding:14px; border-radius:16px; margin-bottom:10px; background:#fff; border:2px solid var(--line); font-weight:800; }
+    .prow.hide { opacity:0.55; }
+    .prow.show { animation:pop-in .45s cubic-bezier(.2,1.4,.4,1); }
+    .prow .brank { font-size:1.4rem; flex:none; }
+    .pava { width:46px; height:46px; border-radius:50%; object-fit:cover; flex:none; }
+    .pbadge { width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex:none; }
+    .prow .bname { flex:1; font-family:"Fredoka",sans-serif; font-size:1.2rem; text-align:left; }
+    .prow .bpts { font-family:"Fredoka",sans-serif; font-size:1.35rem; flex:none; }
+    .prow.champ { box-shadow:0 12px 34px rgba(0,0,0,0.16); border-width:3px; }
+
     .menu { position:fixed; inset:0; background:rgba(58,46,34,0.5); display:flex; justify-content:flex-end; z-index:50; }
     .menu[hidden] { display:none; }
     .menu-inner { background:var(--card); width:82%; max-width:320px; height:100%; padding:22px 18px; display:flex; flex-direction:column; gap:10px; box-shadow:-10px 0 40px rgba(0,0,0,0.25); }
@@ -175,6 +196,14 @@
     ];
     const DEFI_BY_KEY = Object.fromEntries(DEFIS.map((d) => [d.key, d]));
     const SECRET_WORDS = { 1:"banane", 2:"tracteur", 3:"chaussette", 4:"moustache" };
+    const AWARDS = [
+      { key:"mvp",        emoji:"💪", title:"MVP de la journée",          points:3 },
+      { key:"malchance",  emoji:"🍀", title:"Le·la plus malchanceux·se",  points:2 },
+      { key:"drole",      emoji:"😂", title:"Le·la plus drôle",           points:2 },
+      { key:"revelation", emoji:"🔥", title:"La révélation",              points:2 },
+      { key:"fairplay",   emoji:"🤝", title:"Meilleur esprit d'équipe",   points:3 },
+    ];
+    const STEP_LABELS = ["Intro — scores des jeux", "Révélation des défis", "Remise des prix", "Podium — 4ᵉ place", "Podium — 3ᵉ place", "Podium — 2ᵉ place", "Podium — 1ʳᵉ place"];
     const STORAGE_KEY = "cousinade_player_id";
 
     const screen = document.getElementById("screen");
@@ -184,6 +213,7 @@
 
     let myId = localStorage.getItem(STORAGE_KEY);
     let myPlayer = null, myTeam = null, activeGame = null, teammates = [], allTeams = {}, scoresData = [], mySubs = [];
+    let finalePhase = "playing", revealStep = 0, allPlayers = [], approvedSubs = [], allVotes = [], myVotes = {}, openCat = null;
     let currentView = "main", editorOpen = false;
 
     function setBg(top, bottom) { document.body.style.background = `linear-gradient(170deg, ${top}, ${bottom})`; }
@@ -236,10 +266,27 @@
       const { data } = await supabase.from("submissions").select("id,defi,status,player_id").eq("team", myPlayer.team);
       mySubs = data || [];
     }
+    async function loadState() {
+      const { data } = await supabase.from("state").select("phase,step").eq("id", 1).maybeSingle();
+      finalePhase = data ? data.phase : "playing"; revealStep = data ? (data.step || 0) : 0;
+    }
+    async function loadVotesP() {
+      const [vR, mvR] = await Promise.all([
+        supabase.from("votes").select("category,candidate_id"),
+        supabase.from("votes").select("category,candidate_id").eq("voter_id", myId),
+      ]);
+      allVotes = vR.data || []; myVotes = {}; (mvR.data || []).forEach((v) => (myVotes[v.category] = v.candidate_id));
+    }
+    async function loadApprovedP() { const { data } = await supabase.from("submissions").select("defi,team,points").eq("status", "approved"); approvedSubs = data || []; }
+    async function loadFinale() {
+      const { data } = await supabase.from("players").select("id,name,team,photo");
+      allPlayers = data || []; await loadApprovedP(); await loadVotesP();
+    }
     async function loadContext() {
       if (!myPlayer) return;
-      await loadTeams(); await loadScores(); await loadActiveGame(); await loadSubs();
+      await loadTeams(); await loadScores(); await loadActiveGame(); await loadSubs(); await loadState();
       if (myPlayer.team && activeGame) await loadTeammates(); else teammates = [];
+      if (finalePhase !== "playing") await loadFinale();
     }
 
     // ---------- JOIN ----------
@@ -491,9 +538,110 @@
       if (msg) { msg.style.color = "#1f9d63"; msg.textContent = "✓ Envoyé ! En attente de validation 🤫"; }
     }
 
+    // ---------- FINALE : calculs ----------
+    function defiPointsP(t) {
+      let total = 0; const seen = new Set();
+      approvedSubs.filter((s) => s.team === t).forEach((s) => { const d = DEFI_BY_KEY[s.defi]; if (d && !d.repeatable) { if (seen.has(s.defi)) return; seen.add(s.defi); } total += s.points; });
+      return total;
+    }
+    function awardResults() {
+      const res = {};
+      AWARDS.forEach((a) => {
+        const counts = {};
+        allVotes.filter((v) => v.category === a.key).forEach((v) => (counts[v.candidate_id] = (counts[v.candidate_id] || 0) + 1));
+        let max = 0; Object.values(counts).forEach((c) => { if (c > max) max = c; });
+        let winners = [];
+        if (max > 0) winners = Object.keys(counts).filter((id) => counts[id] === max).map((id) => allPlayers.find((p) => p.id === id)).filter(Boolean);
+        res[a.key] = { award: a, winners, max };
+      });
+      return res;
+    }
+    function awardPointsP(t, results) {
+      let total = 0;
+      AWARDS.forEach((a) => { const r = results[a.key]; if (!r || !r.winners.length) return; if (new Set(r.winners.map((w) => w.team)).has(t)) total += a.points; });
+      return total;
+    }
+    function finalTotal(t, results) { return teamTotal(t) + defiPointsP(t) + awardPointsP(t, results); }
+
+    // ---------- FINALE : vote ----------
+    async function castVote(category, candidateId) {
+      myVotes[category] = candidateId; openCat = null; voteView();
+      const { error } = await supabase.from("votes").upsert({ category, voter_id: myId, candidate_id: candidateId }, { onConflict: "category,voter_id" });
+      if (error) alert("Erreur vote : " + error.message);
+    }
+    function voteView() {
+      resetBg(); subtitle.textContent = "Élis les héros de la journée !";
+      const others = allPlayers.filter((p) => !myPlayer.team || p.team !== myPlayer.team);
+      const cards = AWARDS.map((a) => {
+        const chosenId = myVotes[a.key];
+        const chosen = chosenId ? allPlayers.find((p) => p.id === chosenId) : null;
+        let inner;
+        if (openCat === a.key) {
+          const chips = others.map((p) => `<span class="vchip ${chosenId === p.id ? "sel" : ""}" data-vote="${a.key}|${p.id}">${avatarImg(p.photo, "av", "👤")}${escapeHtml(p.name)}</span>`).join("") || `<span class="defi-todo">Personne à élire…</span>`;
+          inner = `<div class="vote-grid">${chips}</div>`;
+        } else if (chosen) {
+          inner = `<div class="vote-chosen">${avatarImg(chosen.photo, "me-ava", "👤")} <b>${escapeHtml(chosen.name)}</b> <button class="vchange" data-open="${a.key}">changer</button></div>`;
+        } else {
+          inner = `<button class="defi-btn" data-open="${a.key}">Choisir</button>`;
+        }
+        return `<div class="card defi-card"><div class="defi-head"><span class="defi-emoji">${a.emoji}</span><div class="defi-titles"><div class="defi-title">${escapeHtml(a.title)}</div><div class="defi-pts">+${a.points} pts à l'équipe du gagnant</div></div></div>${inner}</div>`;
+      }).join("");
+      const voted = AWARDS.filter((a) => myVotes[a.key]).length;
+      const intro = `<div class="card defi-intro"><div class="ico">🗳️</div><p>Vote pour un cousin ou une cousine <strong>d'une autre équipe</strong> dans chaque catégorie. Tu peux changer tant que c'est ouvert !</p><p class="defi-pts" style="margin-top:8px">${voted}/${AWARDS.length} catégories votées</p></div>`;
+      screen.innerHTML = intro + cards;
+      screen.querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", () => { openCat = b.dataset.open; voteView(); }));
+      screen.querySelectorAll("[data-vote]").forEach((b) => b.addEventListener("click", () => { const [c, p] = b.dataset.vote.split("|"); castVote(c, p); }));
+    }
+
+    // ---------- FINALE : révélation ----------
+    function revealView() {
+      resetBg();
+      const results = awardResults();
+      const s = revealStep;
+      const medals = ["🥇","🥈","🥉","4️⃣"];
+      if (s <= 2) {
+        const showDefis = s >= 1, showAwards = s >= 2;
+        subtitle.textContent = s === 0 ? "🥁 Les scores des jeux…" : s === 1 ? "🎯 Les points cachés des défis !" : "🏅 La remise des prix !";
+        let awardsHtml = "";
+        if (showAwards) {
+          awardsHtml = `<div class="card"><h3 style="font-family:'Fredoka';text-align:center;margin:0 0 12px">🏅 Les prix de la journée</h3>` + AWARDS.map((a) => {
+            const r = results[a.key];
+            const w = r.winners.length ? r.winners.map((p) => `<span class="award-win">${avatarImg(p.photo, "av", "👤")}${escapeHtml(p.name)}</span>`).join(" ") : `<span class="defi-todo">— pas de vote —</span>`;
+            return `<div class="award-row"><span class="defi-emoji">${a.emoji}</span><div style="flex:1;text-align:left"><div class="defi-title" style="font-size:1.05rem">${escapeHtml(a.title)}</div><div style="margin-top:4px">${w}</div></div></div>`;
+          }).join("") + `</div>`;
+        }
+        const ranked = [1,2,3,4].map((t) => ({ t, base: teamTotal(t), dp: showDefis ? defiPointsP(t) : 0, ap: showAwards ? awardPointsP(t, results) : 0 }))
+          .map((o) => ({ ...o, total: o.base + o.dp + o.ap })).sort((a, b) => b.total - a.total || a.t - b.t);
+        const rows = ranked.map((r) => {
+          const ph = allTeams[r.t] && allTeams[r.t].photo;
+          const ava = ph ? `<img class="bava" src="${ph}" alt="" />` : `<span class="bswatch" style="background:${TEAMS[r.t].hex}"></span>`;
+          const add = `${r.dp ? `<span class="rev-add">+${r.dp}🎯</span>` : ""}${r.ap ? `<span class="rev-add">+${r.ap}🏅</span>` : ""}`;
+          return `<div class="brow">${ava}<span class="bname">${escapeHtml(teamDisplayName(r.t))}</span>${add}<span class="bpts">${r.total}</span></div>`;
+        }).join("");
+        screen.innerHTML = `${awardsHtml}<div class="card board"><h3>Classement provisoire</h3>${rows}</div><div class="card defi-intro"><p>La révélation finale arrive… 🤫</p></div>`;
+        return;
+      }
+      subtitle.textContent = "🏆 Le classement final !";
+      const ranking = [1,2,3,4].map((t) => ({ t, total: finalTotal(t, results) })).sort((a, b) => b.total - a.total || teamTotal(b.t) - teamTotal(a.t) || a.t - b.t);
+      const revealedCount = Math.min(4, s - 2);
+      const rows = ranking.map((r, idx) => {
+        const shown = idx >= (4 - revealedCount);
+        if (!shown) return `<div class="prow hide"><span class="brank">${medals[idx]}</span><span class="bname" style="color:var(--muted)">🤔 ? ? ?</span></div>`;
+        const ph = allTeams[r.t] && allTeams[r.t].photo;
+        const ava = ph ? `<img class="pava" src="${ph}" alt="" />` : `<span class="pbadge" style="background:${TEAMS[r.t].hex}">${TEAMS[r.t].emoji}</span>`;
+        return `<div class="prow show${idx === 0 ? " champ" : ""}" style="border-color:${TEAMS[r.t].hex}"><span class="brank">${medals[idx]}</span>${ava}<span class="bname" style="color:${TEAMS[r.t].hex}">${escapeHtml(teamDisplayName(r.t))}</span><span class="bpts">${r.total}</span></div>`;
+      }).join("");
+      const champ = revealedCount >= 4
+        ? `<div class="card defi-intro"><div class="ico">🎉🏆🎉</div><p><strong>${escapeHtml(teamDisplayName(ranking[0].t))}</strong> remporte l'Edward D'or ${new Date().getFullYear()} !</p></div>`
+        : `<div class="card defi-intro"><p>Suspense… 🥁</p></div>`;
+      screen.innerHTML = `<div class="card board"><h3>🏆 Podium final</h3>${rows}</div>${champ}`;
+    }
+
     // ---------- ROUTER ----------
     function renderCurrent() {
       if (!myPlayer) { burger.hidden = true; menu.hidden = true; showJoinForm(); return; }
+      if (finalePhase === "voting") { burger.hidden = true; menu.hidden = true; return voteView(); }
+      if (finalePhase === "reveal") { burger.hidden = true; menu.hidden = true; return revealView(); }
       burger.hidden = false; updateMenuActive();
       if (currentView === "classement") return classementView();
       if (currentView === "palmares") return placeholderView("🏅", "Palmarès", "Les vainqueurs des éditions passées s'afficheront ici.");
@@ -508,7 +656,9 @@
     async function onTeams() { await loadTeams(); renderCurrent(); }
     async function onScores() { await loadScores(); renderCurrent(); }
     async function onGames() { await loadActiveGame(); if (myPlayer && myPlayer.team && activeGame) await loadTeammates(); renderCurrent(); }
-    async function onSubs() { await loadSubs(); if (currentView === "defis") defisView(); }
+    async function onSubs() { await loadSubs(); if (finalePhase !== "playing") { await loadApprovedP(); renderCurrent(); } else if (currentView === "defis") defisView(); }
+    async function onState() { await loadState(); if (finalePhase !== "playing" && !allPlayers.length) await loadFinale(); renderCurrent(); }
+    async function onVotes() { if (finalePhase !== "playing") { await loadVotesP(); renderCurrent(); } }
     function subscribeRealtime() {
       supabase.channel("player-watch")
         .on("postgres_changes", { event:"INSERT", schema:"public", table:"players" }, () => updateCount())
@@ -518,6 +668,8 @@
         .on("postgres_changes", { event:"*", schema:"public", table:"games" }, () => onGames())
         .on("postgres_changes", { event:"*", schema:"public", table:"scores" }, () => onScores())
         .on("postgres_changes", { event:"*", schema:"public", table:"submissions" }, () => onSubs())
+        .on("postgres_changes", { event:"*", schema:"public", table:"state" }, () => onState())
+        .on("postgres_changes", { event:"*", schema:"public", table:"votes" }, () => onVotes())
         .subscribe();
     }
 

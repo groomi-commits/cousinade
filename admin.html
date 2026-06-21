@@ -134,11 +134,20 @@
     ];
     const ADEFI = Object.fromEntries(DEFIS.map((d) => [d.key, d]));
     const SECRET_WORDS = { 1:"banane", 2:"tracteur", 3:"chaussette", 4:"moustache" };
+    const AWARDS = [
+      { key:"mvp",        emoji:"💪", title:"MVP de la journée",          points:3 },
+      { key:"malchance",  emoji:"🍀", title:"Le·la plus malchanceux·se",  points:2 },
+      { key:"drole",      emoji:"😂", title:"Le·la plus drôle",           points:2 },
+      { key:"revelation", emoji:"🔥", title:"La révélation",              points:2 },
+      { key:"fairplay",   emoji:"🤝", title:"Meilleur esprit d'équipe",   points:3 },
+    ];
+    const STEP_LABELS = ["Intro — scores des jeux", "Révélation des défis 🎯", "Remise des prix 🏅", "Podium — 4ᵉ place", "Podium — 3ᵉ place", "Podium — 2ᵉ place", "Podium — 1ʳᵉ place 🏆"];
     const famLabel = (v) => { const f = FAMILIES.find((x) => x.val === v); return f ? f.label : (v || "?"); };
 
     const dyn = document.getElementById("dynamic");
     let players = [], teamsData = {}, gamesData = [], scoresData = [], activeGame = null, pendingTheme = null;
     let subsPending = [], subsApproved = [];
+    let statePhase = "playing", stateStep = 0, votesData = [];
 
     function teamDefiPoints(t) {
       let total = 0; const seen = new Set();
@@ -186,13 +195,15 @@
     addName.addEventListener("keydown", (e) => { if (e.key === "Enter") addBtn.click(); });
 
     async function load() {
-      const [pRes, tRes, gRes, sRes, subPRes, subARes] = await Promise.all([
+      const [pRes, tRes, gRes, sRes, subPRes, subARes, stRes, vRes] = await Promise.all([
         supabase.from("players").select("id,name,sex,age_group,family,team,draft_team,created_at").order("created_at", { ascending: true }),
         supabase.from("teams").select("id,name,captain_id,selected").order("id"),
         supabase.from("games").select("*").order("position", { ascending: true }),
         supabase.from("scores").select("*"),
         supabase.from("submissions").select("id,defi,team,player_id,photo,note,points,created_at").eq("status", "pending").order("created_at", { ascending: true }),
         supabase.from("submissions").select("defi,team,points").eq("status", "approved"),
+        supabase.from("state").select("phase,step").eq("id", 1).maybeSingle(),
+        supabase.from("votes").select("category,candidate_id,voter_id"),
       ]);
       if (pRes.error) { dyn.innerHTML = `<div class="card"><div class="empty">Erreur : ${escapeHtml(pRes.error.message)}</div></div>`; return; }
       players = pRes.data || [];
@@ -201,6 +212,9 @@
       scoresData = sRes.data || [];
       subsPending = subPRes.data || [];
       subsApproved = subARes.data || [];
+      statePhase = stRes.data ? stRes.data.phase : "playing";
+      stateStep = stRes.data ? (stRes.data.step || 0) : 0;
+      votesData = vRes.data || [];
       activeGame = gamesData.find((g) => g.status === "active") || null;
       render();
     }
@@ -304,6 +318,51 @@
         ${bank}</div>`;
     }
 
+    function awardWinnersA() {
+      const res = {};
+      AWARDS.forEach((a) => {
+        const counts = {};
+        votesData.filter((v) => v.category === a.key).forEach((v) => (counts[v.candidate_id] = (counts[v.candidate_id] || 0) + 1));
+        let max = 0; Object.values(counts).forEach((c) => { if (c > max) max = c; });
+        const winnerIds = max > 0 ? Object.keys(counts).filter((id) => counts[id] === max) : [];
+        res[a.key] = { winnerIds, max, counts };
+      });
+      return res;
+    }
+    function awardPointsA(t, res) {
+      let total = 0;
+      AWARDS.forEach((a) => { const r = res[a.key]; if (!r || !r.winnerIds.length) return; const teams = new Set(r.winnerIds.map((id) => { const p = players.find((x) => x.id === id); return p ? p.team : null; })); if (teams.has(t)) total += a.points; });
+      return total;
+    }
+
+    function finaleCardHtml() {
+      if (statePhase === "playing") {
+        return `<div class="card"><h2>🎬 Grande Finale</h2><p class="addhint">Quand tous les jeux sont finis : ouvre les votes, et tous les téléphones basculent sur l'écran de vote.</p><button id="openVoteBtn" class="reveal">🗳️ Ouvrir les votes sur tous les téléphones</button></div>`;
+      }
+      if (statePhase === "voting") {
+        const res = awardWinnersA();
+        const tally = AWARDS.map((a) => {
+          const r = res[a.key];
+          const total = Object.values(r.counts).reduce((s, c) => s + c, 0);
+          const lead = r.winnerIds.length ? r.winnerIds.map((id) => escapeHtml(nameById(id))).join(", ") + ` (${r.max})` : "—";
+          return `<div class="live-row"><span class="nm">${a.emoji} ${escapeHtml(a.title)}</span><span class="bank-pts">${total} vote${total > 1 ? "s" : ""} · ${lead}</span></div>`;
+        }).join("");
+        const voters = new Set(votesData.map((v) => v.voter_id)).size;
+        return `<div class="card"><h2>🎬 Finale — votes ouverts</h2><p class="addhint">Les joueurs votent sur leur téléphone. ${voters}/${players.length} ont commencé à voter. Tendances en direct :</p>${tally}
+          <div class="btns" style="margin-top:14px"><button id="toRevealBtn" class="reveal">🎬 Clore & lancer la révélation</button></div>
+          <div class="btns" style="margin-top:10px"><button id="cancelFinaleBtn" class="ghost">↩️ Annuler (revenir au jeu)</button></div></div>`;
+      }
+      const res = awardWinnersA();
+      const ranking = [1,2,3,4].map((t) => ({ t, total: teamTotal(t) + teamDefiPoints(t) + awardPointsA(t, res) })).sort((a, b) => b.total - a.total || a.t - b.t);
+      const standings = ranking.map((r, i) => `<div class="live-row"><span class="swatch" style="background:${TEAMS[r.t].hex}"></span><span class="nm">${["🥇","🥈","🥉","4️⃣"][i]} ${escapeHtml(teamName(r.t))}</span><span class="bank-pts">${r.total} pts</span></div>`).join("");
+      const label = STEP_LABELS[stateStep] || "";
+      return `<div class="card"><h2>🎬 Révélation en cours</h2>
+        <p class="addhint">Étape ${stateStep + 1}/${STEP_LABELS.length} — <b>${escapeHtml(label)}</b><br/>Tous les téléphones affichent cette étape. Clique « Suivant » à ton rythme.</p>
+        <div class="btns"><button id="prevStepBtn" class="ghost" ${stateStep <= 0 ? "disabled" : ""}>◀ Précédent</button><button id="nextStepBtn" class="reveal" ${stateStep >= STEP_LABELS.length - 1 ? "disabled" : ""}>Suivant ▶</button></div>
+        <h2 class="sub-h2">Classement final (ton aperçu privé)</h2>${standings}
+        <div class="btns" style="margin-top:12px"><button id="cancelFinaleBtn" class="ghost">↩️ Terminer / revenir au jeu</button></div></div>`;
+    }
+
     function render() {
       const total = players.length;
       const hasDraft = players.some((p) => p.draft_team != null);
@@ -343,6 +402,7 @@
           <div class="btns" style="margin-top:10px"><button id="drawBtn" class="ghost">🎲 Refaire le tirage</button><button id="clearBtn" class="ghost">Annuler le tirage</button></div></div>`;
       }
 
+      if (revealed) html += finaleCardHtml();
       if (revealed) html += classementCardHtml();
       if (revealed) html += gamesCardHtml(revealed);
       if (revealed) html += defisCardHtml();
@@ -370,6 +430,11 @@
       dyn.querySelectorAll("[data-approve]").forEach((el) => el.addEventListener("click", () => reviewSub(el.dataset.approve, "approved")));
       dyn.querySelectorAll("[data-reject]").forEach((el) => el.addEventListener("click", () => reviewSub(el.dataset.reject, "rejected")));
       dyn.querySelectorAll("[data-award]").forEach((el) => el.addEventListener("click", () => { const [k, t] = el.dataset.award.split("|"); awardLive(k, parseInt(t, 10)); }));
+      if (g("openVoteBtn")) g("openVoteBtn").addEventListener("click", openVoting);
+      if (g("toRevealBtn")) g("toRevealBtn").addEventListener("click", toReveal);
+      if (g("prevStepBtn")) g("prevStepBtn").addEventListener("click", () => setStep(-1));
+      if (g("nextStepBtn")) g("nextStepBtn").addEventListener("click", () => setStep(1));
+      if (g("cancelFinaleBtn")) g("cancelFinaleBtn").addEventListener("click", cancelFinale);
     }
 
     function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
@@ -484,6 +549,30 @@
       if (error) { alert("Erreur : " + error.message); return; }
       await load();
     }
+    async function openVoting() {
+      if (!confirm("Ouvrir les votes ? Tous les téléphones passent sur l'écran de vote.")) return;
+      const { error } = await supabase.from("state").update({ phase: "voting", step: 0 }).eq("id", 1);
+      if (error) { alert("Erreur : " + error.message); return; }
+      await load();
+    }
+    async function toReveal() {
+      if (!confirm("Clore les votes et lancer la révélation finale ?")) return;
+      const { error } = await supabase.from("state").update({ phase: "reveal", step: 0 }).eq("id", 1);
+      if (error) { alert("Erreur : " + error.message); return; }
+      await load();
+    }
+    async function setStep(delta) {
+      const ns = Math.max(0, Math.min(STEP_LABELS.length - 1, stateStep + delta));
+      const { error } = await supabase.from("state").update({ step: ns }).eq("id", 1);
+      if (error) { alert("Erreur : " + error.message); return; }
+      await load();
+    }
+    async function cancelFinale() {
+      if (!confirm("Revenir au jeu normal ? (les votes et points sont conservés)")) return;
+      const { error } = await supabase.from("state").update({ phase: "playing", step: 0 }).eq("id", 1);
+      if (error) { alert("Erreur : " + error.message); return; }
+      await load();
+    }
 
     supabase.channel("admin-watch")
       .on("postgres_changes", { event:"*", schema:"public", table:"players" }, () => load())
@@ -491,6 +580,8 @@
       .on("postgres_changes", { event:"*", schema:"public", table:"games" }, () => load())
       .on("postgres_changes", { event:"*", schema:"public", table:"scores" }, () => load())
       .on("postgres_changes", { event:"*", schema:"public", table:"submissions" }, () => load())
+      .on("postgres_changes", { event:"*", schema:"public", table:"state" }, () => load())
+      .on("postgres_changes", { event:"*", schema:"public", table:"votes" }, () => load())
       .subscribe();
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") load(); });
     window.addEventListener("focus", load);

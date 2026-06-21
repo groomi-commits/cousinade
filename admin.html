@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root { --bg:#f4ede2; --card:#fffaf3; --ink:#3a2e22; --muted:#8a7a66; --accent:#ff6b4a; --accent-dark:#e8543a; --line:#ece0d0; --pill:#fff0e6; --danger:#c0392b; --green:#1f9d63; }
-    * { box-sizing: border-box; }
+    * { box-sizing:border-box; }
     body { margin:0; min-height:100vh; font-family:"Nunito",system-ui,sans-serif; color:var(--ink); background:var(--bg); display:flex; justify-content:center; padding:24px 16px 60px; }
     .container { width:100%; max-width:640px; }
     header { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px; }
@@ -21,8 +21,7 @@
     .addhint { color:var(--muted); font-weight:700; font-size:0.86rem; margin:0 0 14px; }
     input { width:100%; font-family:inherit; font-size:1.05rem; padding:12px 14px; border:2px solid var(--line); border-radius:12px; background:#fff; color:var(--ink); outline:none; transition:border-color .15s,box-shadow .15s; margin-bottom:10px; }
     input:focus { border-color:var(--accent); box-shadow:0 0 0 4px rgba(255,107,74,0.3); }
-    .choices { display:flex; gap:8px; margin-bottom:10px; }
-    .choices.wrap { flex-wrap:wrap; }
+    .choices { display:flex; gap:8px; margin-bottom:10px; } .choices.wrap { flex-wrap:wrap; }
     .choice { flex:1; display:flex; align-items:center; justify-content:center; text-align:center; font-family:"Fredoka",sans-serif; font-weight:600; font-size:0.95rem; padding:10px 6px; border:2px solid var(--line); border-radius:11px; background:#fff; color:var(--ink); cursor:pointer; transition:all .12s; }
     .choices.wrap .choice { flex:1 1 30%; min-width:88px; }
     .choice.selected { border-color:var(--accent); background:var(--pill); color:var(--accent-dark); }
@@ -42,6 +41,7 @@
     button.reveal { background:var(--green); } button.reveal:hover { background:#18804f; }
     button.ghost { background:#fff; color:var(--ink); border:2px solid var(--line); } button.ghost:hover { background:#faf4ec; }
     button.danger { background:#fff; color:var(--danger); border:2px solid #f0cfc9; flex:none; min-width:auto; padding:10px 14px; font-size:0.88rem; } button.danger:hover { background:#fdeeec; }
+    button.mini { flex:none; min-width:auto; padding:8px 16px; }
     .banner { border-radius:12px; padding:11px 14px; font-weight:800; font-size:0.92rem; margin-bottom:14px; }
     .banner.todo { background:#eef4ff; border:1.5px solid #c7d9ff; color:#2b4d99; }
     .banner.warn { background:#fff3e0; border:1.5px solid #ffd49b; color:#8a5a00; }
@@ -62,6 +62,14 @@
     .chip:hover { transform:scale(1.18); } .chip.current { box-shadow:0 0 0 2px var(--ink); cursor:default; }
     .capselect { display:flex; align-items:center; gap:6px; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); font-weight:800; font-size:0.82rem; color:var(--muted); }
     .capselect select { flex:1; font-family:inherit; font-weight:700; font-size:0.88rem; padding:7px 8px; border:1.5px solid var(--line); border-radius:9px; background:#fff; color:var(--ink); margin:0; }
+    .gthemes { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:12px; }
+    .gtheme { font-family:"Fredoka",sans-serif; font-weight:600; text-align:center; padding:14px 8px; border:2px solid var(--line); border-radius:12px; background:#fff; cursor:pointer; transition:all .12s; }
+    .gtheme.sel { border-color:var(--accent); background:var(--pill); color:var(--accent-dark); }
+    .gtheme.done { color:var(--muted); background:#efe7dc; cursor:default; border-style:dashed; }
+    .launchbar { margin-top:14px; font-weight:800; display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:var(--pill); padding:12px 14px; border-radius:12px; }
+    .selrow { padding:9px 4px; border-top:1px solid var(--line); font-weight:700; font-size:0.95rem; }
+    .selrow:first-of-type { border-top:none; }
+    .selrow .swatch { display:inline-block; vertical-align:middle; margin-right:6px; }
     .empty { color:var(--muted); font-weight:700; text-align:center; padding:14px 0; }
     .note { color:var(--muted); font-weight:700; font-size:0.88rem; margin-top:10px; text-align:center; }
     @media (max-width:460px) { .teams { grid-template-columns:1fr; } }
@@ -70,20 +78,14 @@
 <body>
   <div class="container">
     <header><h1>🏆 Edward D'or</h1><span class="tag">Admin</span></header>
-    <p class="sub">Tableau de bord — tirage des équipes</p>
+    <p class="sub">Tableau de bord</p>
 
     <div class="card" id="addCard">
       <h2>➕ Ajouter quelqu'un à la main</h2>
       <p class="addhint">Pour les enfants ou ceux qui n'ont pas de téléphone.</p>
       <input id="addName" type="text" placeholder="Prénom" autocomplete="off" maxlength="40" />
-      <div class="choices" id="addSex">
-        <div class="choice" data-val="H">Homme</div>
-        <div class="choice" data-val="F">Femme</div>
-      </div>
-      <div class="choices" id="addAge">
-        <div class="choice" data-val="jeune">Jeune</div>
-        <div class="choice" data-val="senior">Plus trop jeune (essaye de l'être)</div>
-      </div>
+      <div class="choices" id="addSex"><div class="choice" data-val="H">Homme</div><div class="choice" data-val="F">Femme</div></div>
+      <div class="choices" id="addAge"><div class="choice" data-val="jeune">Jeune</div><div class="choice" data-val="senior">Plus trop jeune (essaye de l'être)</div></div>
       <div class="choices wrap" id="addFam"></div>
       <button id="addBtn" style="width:100%">＋ Ajouter à la liste</button>
     </div>
@@ -97,29 +99,19 @@
     const SUPABASE_KEY = "sb_publishable_nAUDhRZoY7cd4FBRLACU5A_oule5R-0";
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const TEAMS = {
-      1: { name:"Rouge", emoji:"🔴", hex:"#e23b2e" },
-      2: { name:"Bleu",  emoji:"🔵", hex:"#2f6df0" },
-      3: { name:"Vert",  emoji:"🟢", hex:"#1f9d63" },
-      4: { name:"Jaune", emoji:"🟡", hex:"#e8a200" },
-    };
-    const FAMILIES = [
-      { val:"MOUDA", label:"Mouda" }, { val:"POIRIER", label:"Poirier" },
-      { val:"BOUVIER", label:"Bouvier" }, { val:"DOUKHAN/DAINNE", label:"Doukhan/Dainne" },
-      { val:"AUTRE", label:"Autre" },
-    ];
+    const TEAMS = { 1:{name:"Rouge",emoji:"🔴",hex:"#e23b2e"}, 2:{name:"Bleu",emoji:"🔵",hex:"#2f6df0"}, 3:{name:"Vert",emoji:"🟢",hex:"#1f9d63"}, 4:{name:"Jaune",emoji:"🟡",hex:"#e8a200"} };
+    const FAMILIES = [ {val:"MOUDA",label:"Mouda"}, {val:"POIRIER",label:"Poirier"}, {val:"BOUVIER",label:"Bouvier"}, {val:"DOUKHAN/DAINNE",label:"Doukhan/Dainne"}, {val:"AUTRE",label:"Autre"} ];
     const famLabel = (v) => { const f = FAMILIES.find((x) => x.val === v); return f ? f.label : (v || "?"); };
 
     const dyn = document.getElementById("dynamic");
-    let players = [];
-    let teamsData = {};
+    let players = [], teamsData = {}, gamesData = [], activeGame = null, pendingTheme = null;
 
     function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
     const sexLabel = (s) => (s === "H" ? "H" : s === "F" ? "F" : "?");
     const ageLabel = (a) => (a === "jeune" ? "Jeune" : a === "senior" ? "Sénior" : "?");
     const teamName = (t) => (teamsData[t] && teamsData[t].name && teamsData[t].name.trim()) ? teamsData[t].name : `Équipe ${TEAMS[t].name}`;
+    const nameById = (id) => { const p = players.find((x) => x.id === id); return p ? p.name : "?"; };
 
-    // ---------- ADD FORM ----------
     document.getElementById("addFam").innerHTML = FAMILIES.map((f) => `<div class="choice" data-val="${f.val}">${f.label}</div>`).join("");
     let addSex = null, addAge = null, addFam = null;
     function wireChoiceGroup(id, setter) {
@@ -129,11 +121,8 @@
         el.classList.add("selected"); setter(el.dataset.val);
       }));
     }
-    wireChoiceGroup("addSex", (v) => (addSex = v));
-    wireChoiceGroup("addAge", (v) => (addAge = v));
-    wireChoiceGroup("addFam", (v) => (addFam = v));
-    const addName = document.getElementById("addName");
-    const addBtn = document.getElementById("addBtn");
+    wireChoiceGroup("addSex", (v) => (addSex = v)); wireChoiceGroup("addAge", (v) => (addAge = v)); wireChoiceGroup("addFam", (v) => (addFam = v));
+    const addName = document.getElementById("addName"), addBtn = document.getElementById("addBtn");
     addBtn.addEventListener("click", async () => {
       const name = addName.value.trim();
       if (!name) { addName.focus(); return; }
@@ -150,33 +139,33 @@
     });
     addName.addEventListener("keydown", (e) => { if (e.key === "Enter") addBtn.click(); });
 
-    // ---------- LOAD ----------
     async function load() {
-      const [pRes, tRes] = await Promise.all([
+      const [pRes, tRes, gRes] = await Promise.all([
         supabase.from("players").select("*").order("created_at", { ascending: true }),
         supabase.from("teams").select("*"),
+        supabase.from("games").select("*").order("position", { ascending: true }),
       ]);
       if (pRes.error) { dyn.innerHTML = `<div class="card"><div class="empty">Erreur : ${escapeHtml(pRes.error.message)}</div></div>`; return; }
       players = pRes.data || [];
       teamsData = {}; (tRes.data || []).forEach((t) => (teamsData[t.id] = t));
+      gamesData = gRes.data || [];
+      activeGame = gamesData.find((g) => g.status === "active") || null;
       render();
     }
 
     function bucketsHtml() {
-      const b = { "H-jeune":0, "F-jeune":0, "H-senior":0, "F-senior":0 };
+      const b = { "H-jeune":0,"F-jeune":0,"H-senior":0,"F-senior":0 };
       players.forEach((p) => { const k = `${p.sex}-${p.age_group}`; if (k in b) b[k]++; });
-      const famCounts = FAMILIES.map((f) => `${f.label} ${players.filter((p) => p.family === f.val).length}`).join(" · ");
-      return `<div class="card">
-        <h2>Inscrits</h2>
+      const fam = FAMILIES.map((f) => `${f.label} ${players.filter((p) => p.family === f.val).length}`).join(" · ");
+      return `<div class="card"><h2>Inscrits</h2>
         <div class="buckets" style="margin-top:12px">
           <div class="bucket"><span>🧑 Jeunes hommes</span><span class="n">${b["H-jeune"]}</span></div>
           <div class="bucket"><span>👩 Jeunes femmes</span><span class="n">${b["F-jeune"]}</span></div>
           <div class="bucket"><span>👴 Séniors hommes</span><span class="n">${b["H-senior"]}</span></div>
           <div class="bucket"><span>👵 Séniors femmes</span><span class="n">${b["F-senior"]}</span></div>
         </div>
-        <div class="famtally">👪 ${famCounts}</div>
-        <div class="total">Total : ${players.length} cousin·e·s</div>
-      </div>`;
+        <div class="famtally">👪 ${fam}</div>
+        <div class="total">Total : ${players.length} cousin·e·s</div></div>`;
     }
     function tagList(arr) {
       return arr.map((p) => `<span class="ptag">${escapeHtml(p.name)} <span class="meta">${sexLabel(p.sex)} · ${ageLabel(p.age_group)} · ${escapeHtml(famLabel(p.family))}</span><span class="x" data-del="${p.id}" data-name="${escapeHtml(p.name)}">✕</span></span>`).join("");
@@ -184,10 +173,33 @@
     function memberHtml(p, captainId) {
       const isCap = captainId && p.id === captainId;
       const chips = [1,2,3,4].map((t) => `<span class="chip ${p.draft_team === t ? "current" : ""}" style="background:${TEAMS[t].hex}" ${p.draft_team === t ? "" : `data-move-id="${p.id}" data-move-team="${t}"`} title="${TEAMS[t].name}"></span>`).join("");
-      return `<div class="member">
-        <span class="nm">${isCap ? "👑 " : ""}${escapeHtml(p.name)} <span class="fam">${escapeHtml(famLabel(p.family))}</span></span>
-        <span class="ctrls"><span class="chips">${chips}</span><span class="x" data-del="${p.id}" data-name="${escapeHtml(p.name)}">✕</span></span>
-      </div>`;
+      return `<div class="member"><span class="nm">${isCap ? "👑 " : ""}${escapeHtml(p.name)} <span class="fam">${escapeHtml(famLabel(p.family))}</span></span><span class="ctrls"><span class="chips">${chips}</span><span class="x" data-del="${p.id}" data-name="${escapeHtml(p.name)}">✕</span></span></div>`;
+    }
+
+    function gamesCardHtml(revealed) {
+      const done = gamesData.filter((g) => g.status === "done").length;
+      let inner;
+      if (activeGame) {
+        const noCaptain = [1,2,3,4].some((t) => teamsData[t] && !teamsData[t].captain_id);
+        const rows = [1,2,3,4].map((t) => {
+          const sel = (teamsData[t] && Array.isArray(teamsData[t].selected)) ? teamsData[t].selected : [];
+          const names = sel.map((id) => escapeHtml(nameById(id)));
+          const txt = names.length ? names.join(", ") : `<span style="color:var(--muted)">en attente du chef…</span>`;
+          return `<div class="selrow"><span class="swatch" style="background:${TEAMS[t].hex}"></span><b>${escapeHtml(teamName(t))}</b> : ${txt} <span style="color:var(--muted)">(${names.length}/${activeGame.required})</span></div>`;
+        }).join("");
+        inner = `<div class="banner ok" style="margin-bottom:8px">🎯 En cours : <b>${escapeHtml(activeGame.theme)}</b> — ${activeGame.required} joueur${activeGame.required > 1 ? "s" : ""} par équipe</div>
+          ${noCaptain ? `<div class="banner warn">⚠️ Une ou plusieurs équipes n'ont pas de chef — désigne-les plus haut pour qu'ils puissent choisir.</div>` : ""}
+          <div>${rows}</div>
+          <div class="btns" style="margin-top:14px"><button id="endGameBtn" class="reveal">✅ Terminer ce jeu</button><button id="cancelGameBtn" class="ghost">Annuler</button></div>`;
+      } else {
+        const cards = gamesData.map((g) => {
+          if (g.status === "done") return `<div class="gtheme done">✓ ${escapeHtml(g.theme)}</div>`;
+          return `<div class="gtheme ${pendingTheme === g.theme ? "sel" : ""}" data-theme="${escapeHtml(g.theme)}">${escapeHtml(g.theme)}</div>`;
+        }).join("");
+        const bar = pendingTheme ? `<div class="launchbar">Lancer « ${escapeHtml(pendingTheme)} » avec : <button data-launch="1" class="mini">1</button><button data-launch="2" class="mini">2</button><button data-launch="3" class="mini">3</button> joueur(s) par équipe</div>` : "";
+        inner = `<div class="gthemes">${cards}</div>${bar}`;
+      }
+      return `<div class="card"><h2>🎡 Jeux de l'après-midi</h2><p class="addhint">${done}/${gamesData.length} jeux faits. Clique le thème tiré à la roue.</p>${inner}</div>`;
     }
 
     function render() {
@@ -199,124 +211,90 @@
       let html = bucketsHtml();
 
       if (!hasDraft) {
-        html += `<div class="card">
-          <h2>En attente du tirage</h2>
+        html += `<div class="card"><h2>En attente du tirage</h2>
           <div class="players" style="margin-top:12px">${total === 0 ? `<div class="empty">Personne pour l'instant… partage le lien (ou ajoute des gens à la main) !</div>` : tagList(players)}</div>
           <div class="btns" style="margin-top:16px"><button id="drawBtn" ${total < 4 ? "disabled" : ""}>🎲 Lancer le tirage</button></div>
-          ${total > 0 && total < 4 ? `<div class="note">Il faut au moins 4 inscrits pour faire 4 équipes.</div>` : ""}
-        </div>`;
+          ${total > 0 && total < 4 ? `<div class="note">Il faut au moins 4 inscrits pour faire 4 équipes.</div>` : ""}</div>`;
       } else {
-        const byTeam = { 1:[], 2:[], 3:[], 4:[] };
-        const unplaced = [];
+        const byTeam = { 1:[],2:[],3:[],4:[] }, unplaced = [];
         players.forEach((p) => { if (p.draft_team) byTeam[p.draft_team].push(p); else unplaced.push(p); });
-
         let banner;
         if (!revealed) banner = `<div class="banner todo">🔒 Brouillon — les joueurs ne voient pas encore leurs équipes. Ajuste si besoin, puis révèle.</div>`;
         else if (pending) banner = `<div class="banner warn">✏️ Tu as modifié des équipes. Clique "Publier" pour mettre à jour ce que voient les joueurs.</div>`;
         else banner = `<div class="banner ok">✅ Les joueurs voient leurs équipes (à jour).</div>`;
-
         const teamsHtml = [1,2,3,4].map((t) => {
-          const list = byTeam[t];
-          const capId = teamsData[t] ? teamsData[t].captain_id : null;
+          const list = byTeam[t], capId = teamsData[t] ? teamsData[t].captain_id : null;
           const h = list.filter((p) => p.sex === "H").length, f = list.filter((p) => p.sex === "F").length;
           const j = list.filter((p) => p.age_group === "jeune").length, s = list.filter((p) => p.age_group === "senior").length;
           const capOptions = `<option value="">— aucun —</option>` + list.map((p) => `<option value="${p.id}" ${capId === p.id ? "selected" : ""}>${escapeHtml(p.name)}</option>`).join("");
-          return `<div class="teamcard">
-            <div class="head"><span class="swatch" style="background:${TEAMS[t].hex}"></span><span class="nm">${escapeHtml(teamName(t))}</span><span class="x" data-edit-team="${t}" title="Renommer">✏️</span></div>
+          return `<div class="teamcard"><div class="head"><span class="swatch" style="background:${TEAMS[t].hex}"></span><span class="nm">${escapeHtml(teamName(t))}</span><span class="x" data-edit-team="${t}" title="Renommer">✏️</span></div>
             <div class="comp">${list.length} joueur·s · ${h}H/${f}F · ${j}J/${s}S</div>
             ${list.map((p) => memberHtml(p, capId)).join("") || `<div class="empty" style="padding:8px 0">—</div>`}
-            ${list.length ? `<div class="capselect">👑 Chef :<select data-cap-team="${t}">${capOptions}</select></div>` : ""}
-          </div>`;
+            ${list.length ? `<div class="capselect">👑 Chef :<select data-cap-team="${t}">${capOptions}</select></div>` : ""}</div>`;
         }).join("");
-
-        const revealBtn = pending
-          ? `<button id="revealBtn" class="reveal">${revealed ? "🔄 Publier les changements" : "✅ Révéler aux joueurs"}</button>`
-          : `<button class="reveal" disabled>✓ Équipes à jour</button>`;
-
-        html += `<div class="card">
-          <h2>Les 4 équipes ${revealed ? "" : "(brouillon)"}</h2>
+        const revealBtn = pending ? `<button id="revealBtn" class="reveal">${revealed ? "🔄 Publier les changements" : "✅ Révéler aux joueurs"}</button>` : `<button class="reveal" disabled>✓ Équipes à jour</button>`;
+        html += `<div class="card"><h2>Les 4 équipes ${revealed ? "" : "(brouillon)"}</h2>
           <p class="addhint">Point de couleur = déplacer · ✏️ = renommer · 👑 = désigner le chef.</p>
-          ${banner}
-          <div class="teams">${teamsHtml}</div>
+          ${banner}<div class="teams">${teamsHtml}</div>
           ${unplaced.length ? `<h2 style="margin-top:16px">Pas encore dans une équipe</h2><div style="margin-top:8px">${unplaced.map((p) => memberHtml(p, null)).join("")}</div>` : ""}
           <div class="btns" style="margin-top:16px">${revealBtn}</div>
-          <div class="btns" style="margin-top:10px">
-            <button id="drawBtn" class="ghost">🎲 Refaire le tirage</button>
-            <button id="clearBtn" class="ghost">Annuler le tirage</button>
-          </div>
-        </div>`;
+          <div class="btns" style="margin-top:10px"><button id="drawBtn" class="ghost">🎲 Refaire le tirage</button><button id="clearBtn" class="ghost">Annuler le tirage</button></div></div>`;
       }
 
-      html += `<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-        <span style="color:var(--muted);font-weight:800">Repartir de zéro pour un test</span>
-        <button id="wipeBtn" class="danger">🗑️ Tout effacer</button>
-      </div>`;
+      if (revealed) html += gamesCardHtml(revealed);
+
+      html += `<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px"><span style="color:var(--muted);font-weight:800">Repartir de zéro pour un test</span><button id="wipeBtn" class="danger">🗑️ Tout effacer</button></div>`;
 
       dyn.innerHTML = html;
-      const drawBtn = document.getElementById("drawBtn"); if (drawBtn) drawBtn.addEventListener("click", runDraw);
-      const revealBtn = document.getElementById("revealBtn"); if (revealBtn) revealBtn.addEventListener("click", reveal);
-      const clearBtn = document.getElementById("clearBtn"); if (clearBtn) clearBtn.addEventListener("click", clearTeams);
-      const wipeBtn = document.getElementById("wipeBtn"); if (wipeBtn) wipeBtn.addEventListener("click", wipeAll);
+      const g = (id) => document.getElementById(id);
+      if (g("drawBtn")) g("drawBtn").addEventListener("click", runDraw);
+      if (g("revealBtn")) g("revealBtn").addEventListener("click", reveal);
+      if (g("clearBtn")) g("clearBtn").addEventListener("click", clearTeams);
+      if (g("wipeBtn")) g("wipeBtn").addEventListener("click", wipeAll);
+      if (g("endGameBtn")) g("endGameBtn").addEventListener("click", endGame);
+      if (g("cancelGameBtn")) g("cancelGameBtn").addEventListener("click", cancelGame);
       dyn.querySelectorAll("[data-del]").forEach((el) => el.addEventListener("click", () => deletePlayer(el.dataset.del, el.dataset.name)));
       dyn.querySelectorAll("[data-move-id]").forEach((el) => el.addEventListener("click", () => movePlayer(el.dataset.moveId, parseInt(el.dataset.moveTeam, 10))));
       dyn.querySelectorAll("[data-edit-team]").forEach((el) => el.addEventListener("click", () => editTeamName(parseInt(el.dataset.editTeam, 10))));
       dyn.querySelectorAll("[data-cap-team]").forEach((el) => el.addEventListener("change", () => setCaptain(parseInt(el.dataset.capTeam, 10), el.value || null)));
+      dyn.querySelectorAll("[data-theme]").forEach((el) => el.addEventListener("click", () => { pendingTheme = (pendingTheme === el.dataset.theme) ? null : el.dataset.theme; render(); }));
+      dyn.querySelectorAll("[data-launch]").forEach((el) => el.addEventListener("click", () => launchGame(pendingTheme, parseInt(el.dataset.launch, 10))));
     }
 
     function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
     async function runDraw() {
-      // Priorité sexe + âge (équilibre serré), puis famille comme critère de départage.
       const buckets = {};
       players.forEach((p) => { const k = `${p.sex}-${p.age_group}`; (buckets[k] = buckets[k] || []).push(p); });
       const arrays = Object.values(buckets).sort((a, b) => b.length - a.length);
-      const teamMembers = { 1: [], 2: [], 3: [], 4: [] };
-      const famCount = { 1: {}, 2: {}, 3: {}, 4: {} };
-      const assignments = [];
+      const teamMembers = { 1:[],2:[],3:[],4:[] }, famCount = { 1:{},2:{},3:{},4:{} }, assignments = [];
       arrays.forEach((bucket) => {
-        const members = shuffle(bucket);
-        const bc = { 1: 0, 2: 0, 3: 0, 4: 0 };
+        const members = shuffle(bucket); const bc = { 1:0,2:0,3:0,4:0 };
         members.forEach((p) => {
           const fam = p.family || "NA";
-          const t = [1, 2, 3, 4]
-            .map((id) => ({ id, bc: bc[id], fc: famCount[id][fam] || 0, size: teamMembers[id].length, r: Math.random() }))
-            .sort((a, b) => a.bc - b.bc || a.fc - b.fc || a.size - b.size || a.r - b.r)[0].id;
-          teamMembers[t].push(p); bc[t]++; famCount[t][fam] = (famCount[t][fam] || 0) + 1;
-          assignments.push({ id: p.id, team: t });
+          const t = [1,2,3,4].map((id) => ({ id, bc:bc[id], fc:famCount[id][fam] || 0, size:teamMembers[id].length, r:Math.random() })).sort((a, b) => a.bc - b.bc || a.fc - b.fc || a.size - b.size || a.r - b.r)[0].id;
+          teamMembers[t].push(p); bc[t]++; famCount[t][fam] = (famCount[t][fam] || 0) + 1; assignments.push({ id:p.id, team:t });
         });
       });
-      const btn = document.getElementById("drawBtn");
-      if (btn) { btn.disabled = true; btn.textContent = "Tirage en cours…"; }
+      const btn = document.getElementById("drawBtn"); if (btn) { btn.disabled = true; btn.textContent = "Tirage en cours…"; }
       const results = await Promise.all(assignments.map((a) => supabase.from("players").update({ draft_team: a.team }).eq("id", a.id)));
-      const err = results.find((r) => r.error);
-      if (err) alert("Erreur pendant le tirage : " + err.error.message);
+      const err = results.find((r) => r.error); if (err) alert("Erreur : " + err.error.message);
       await load();
     }
-    async function movePlayer(id, team) {
-      const { error } = await supabase.from("players").update({ draft_team: team }).eq("id", id);
-      if (error) { alert("Erreur : " + error.message); return; }
-      await load();
-    }
-    async function setCaptain(team, playerId) {
-      const { error } = await supabase.from("teams").update({ captain_id: playerId }).eq("id", team);
-      if (error) { alert("Erreur : " + error.message); return; }
-      await load();
-    }
+    async function movePlayer(id, team) { const { error } = await supabase.from("players").update({ draft_team: team }).eq("id", id); if (error) { alert("Erreur : " + error.message); return; } await load(); }
+    async function setCaptain(team, playerId) { const { error } = await supabase.from("teams").update({ captain_id: playerId }).eq("id", team); if (error) { alert("Erreur : " + error.message); return; } await load(); }
     async function editTeamName(team) {
       const current = (teamsData[team] && teamsData[team].name) ? teamsData[team].name : "";
       const n = prompt("Nom de l'équipe (laisse vide pour revenir à la couleur) :", current);
       if (n === null) return;
       const { error } = await supabase.from("teams").update({ name: n.trim() || null }).eq("id", team);
-      if (error) { alert("Erreur : " + error.message); return; }
-      await load();
+      if (error) { alert("Erreur : " + error.message); return; } await load();
     }
     async function reveal() {
-      const btn = document.getElementById("revealBtn");
-      if (btn) { btn.disabled = true; btn.textContent = "Publication…"; }
+      const btn = document.getElementById("revealBtn"); if (btn) { btn.disabled = true; btn.textContent = "Publication…"; }
       const toUpdate = players.filter((p) => (p.team ?? null) !== (p.draft_team ?? null));
       const results = await Promise.all(toUpdate.map((p) => supabase.from("players").update({ team: p.draft_team }).eq("id", p.id)));
-      const err = results.find((r) => r.error);
-      if (err) alert("Erreur : " + err.error.message);
+      const err = results.find((r) => r.error); if (err) alert("Erreur : " + err.error.message);
       await load();
     }
     async function clearTeams() {
@@ -327,8 +305,7 @@
     async function deletePlayer(id, name) {
       if (!confirm(`Retirer ${name} de la liste ?`)) return;
       const { error } = await supabase.from("players").delete().eq("id", id);
-      if (error) { alert("Erreur : " + error.message); return; }
-      await load();
+      if (error) { alert("Erreur : " + error.message); return; } await load();
     }
     async function wipeAll() {
       if (!confirm("⚠️ Effacer TOUS les inscrits ? (seulement pour repartir d'un test propre)")) return;
@@ -336,9 +313,27 @@
       await load();
     }
 
+    async function launchGame(theme, n) {
+      if (!theme) return;
+      await supabase.from("games").update({ status: "active", required: n }).eq("theme", theme);
+      await Promise.all([1,2,3,4].map((t) => supabase.from("teams").update({ selected: [] }).eq("id", t)));
+      pendingTheme = null; await load();
+    }
+    async function endGame() {
+      if (!confirm("Terminer ce jeu ? Il ne pourra plus être relancé.")) return;
+      await supabase.from("games").update({ status: "done" }).eq("status", "active");
+      await load();
+    }
+    async function cancelGame() {
+      await supabase.from("games").update({ status: "todo" }).eq("status", "active");
+      await Promise.all([1,2,3,4].map((t) => supabase.from("teams").update({ selected: [] }).eq("id", t)));
+      await load();
+    }
+
     supabase.channel("admin-watch")
-      .on("postgres_changes", { event: "*", schema: "public", table: "players" }, () => load())
-      .on("postgres_changes", { event: "*", schema: "public", table: "teams" }, () => load())
+      .on("postgres_changes", { event:"*", schema:"public", table:"players" }, () => load())
+      .on("postgres_changes", { event:"*", schema:"public", table:"teams" }, () => load())
+      .on("postgres_changes", { event:"*", schema:"public", table:"games" }, () => load())
       .subscribe();
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") load(); });
     window.addEventListener("focus", load);

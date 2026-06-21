@@ -8,84 +8,67 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    :root {
-      --bg-top: #ffe7b8; --bg-bottom: #ffd2a6; --card: #fffaf3; --ink: #3a2e22;
-      --muted: #8a7a66; --accent: #ff6b4a; --accent-dark: #e8543a;
-      --ring: rgba(255,107,74,0.35); --pill: #fff0e6; --line: #f0e3d4;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; min-height: 100vh; font-family: "Nunito", system-ui, sans-serif;
-      color: var(--ink); background: linear-gradient(170deg, var(--bg-top), var(--bg-bottom));
-      display: flex; justify-content: center; padding: 28px 18px 48px; transition: background 0.5s ease;
-    }
-    .container { width: 100%; max-width: 460px; }
-    header { text-align: center; margin-bottom: 22px; }
-    h1 { font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 2.1rem; margin: 0; letter-spacing: -0.5px; }
-    .subtitle { margin: 6px 0 0; color: var(--muted); font-weight: 700; font-size: 0.95rem; }
-    .card { background: var(--card); border-radius: 22px; padding: 22px; box-shadow: 0 12px 30px rgba(120,70,30,0.12); }
-    label { display: block; font-weight: 800; margin: 0 0 10px; font-size: 1.05rem; }
-    .field { margin-bottom: 20px; }
-    input {
-      width: 100%; font-family: inherit; font-size: 1.1rem; padding: 14px 16px;
-      border: 2px solid var(--line); border-radius: 14px; background: #fff; color: var(--ink);
-      outline: none; transition: border-color 0.15s, box-shadow 0.15s;
-    }
-    input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring); }
-    .choices { display: flex; gap: 10px; }
-    .choices.wrap { flex-wrap: wrap; gap: 8px; }
-    .choice {
-      flex: 1; display: flex; align-items: center; justify-content: center; text-align: center;
-      font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 1.05rem; padding: 13px 8px;
-      border: 2px solid var(--line); border-radius: 14px; background: #fff; color: var(--ink);
-      cursor: pointer; transition: all 0.12s;
-    }
-    .choices.wrap .choice { flex: 1 1 30%; min-width: 92px; font-size: 0.98rem; padding: 12px 8px; }
-    .choice.selected { border-color: var(--accent); background: var(--pill); color: var(--accent-dark); }
-    button.cta {
-      width: 100%; font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 1.15rem;
-      color: #fff; background: var(--accent); border: none; border-radius: 14px; padding: 16px;
-      cursor: pointer; transition: background 0.15s, transform 0.05s;
-    }
-    button.cta:hover { background: var(--accent-dark); }
-    button.cta:active { transform: translateY(1px); }
-    button.cta:disabled { opacity: 0.5; cursor: default; }
+    :root { --bg-top:#ffe7b8; --bg-bottom:#ffd2a6; --card:#fffaf3; --ink:#3a2e22; --muted:#8a7a66; --accent:#ff6b4a; --accent-dark:#e8543a; --ring:rgba(255,107,74,0.35); --pill:#fff0e6; --line:#f0e3d4; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font-family:"Nunito",system-ui,sans-serif; color:var(--ink); background:linear-gradient(170deg,var(--bg-top),var(--bg-bottom)); display:flex; justify-content:center; padding:28px 18px 48px; transition:background .5s ease; }
+    .container { width:100%; max-width:460px; }
+    header { text-align:center; margin-bottom:22px; }
+    h1 { font-family:"Fredoka",sans-serif; font-weight:700; font-size:2.1rem; margin:0; letter-spacing:-0.5px; }
+    .subtitle { margin:6px 0 0; color:var(--muted); font-weight:700; font-size:0.95rem; }
+    .card { background:var(--card); border-radius:22px; padding:22px; box-shadow:0 12px 30px rgba(120,70,30,0.12); }
+    label { display:block; font-weight:800; margin:0 0 10px; font-size:1.05rem; }
+    .field { margin-bottom:20px; }
+    input { width:100%; font-family:inherit; font-size:1.1rem; padding:14px 16px; border:2px solid var(--line); border-radius:14px; background:#fff; color:var(--ink); outline:none; transition:border-color .15s,box-shadow .15s; }
+    input:focus { border-color:var(--accent); box-shadow:0 0 0 4px var(--ring); }
+    .choices { display:flex; gap:10px; }
+    .choices.wrap { flex-wrap:wrap; gap:8px; }
+    .choice { flex:1; display:flex; align-items:center; justify-content:center; text-align:center; font-family:"Fredoka",sans-serif; font-weight:600; font-size:1.05rem; padding:13px 8px; border:2px solid var(--line); border-radius:14px; background:#fff; color:var(--ink); cursor:pointer; transition:all .12s; }
+    .choices.wrap .choice { flex:1 1 30%; min-width:92px; font-size:0.98rem; padding:12px 8px; }
+    .choice.selected { border-color:var(--accent); background:var(--pill); color:var(--accent-dark); }
+    button.cta { width:100%; font-family:"Fredoka",sans-serif; font-weight:600; font-size:1.15rem; color:#fff; background:var(--accent); border:none; border-radius:14px; padding:16px; cursor:pointer; transition:background .15s,transform .05s; }
+    button.cta:hover { background:var(--accent-dark); } button.cta:active { transform:translateY(1px); } button.cta:disabled { opacity:0.5; cursor:default; }
 
-    .waiting { text-align: center; }
-    .waiting .big { font-family: "Fredoka", sans-serif; font-size: 1.5rem; font-weight: 700; margin: 4px 0 6px; }
-    .waiting .hint { color: var(--muted); font-weight: 700; margin: 0 0 20px; }
-    .spinner { width: 46px; height: 46px; margin: 8px auto 20px; border-radius: 50%; border: 5px solid var(--line); border-top-color: var(--accent); animation: spin 0.9s linear infinite; }
-    .count-badge { display: inline-block; background: var(--pill); color: var(--accent-dark); font-family: "Fredoka", sans-serif; font-weight: 600; border-radius: 999px; padding: 8px 16px; font-size: 1rem; }
+    .waiting { text-align:center; }
+    .waiting .big { font-family:"Fredoka",sans-serif; font-size:1.5rem; font-weight:700; margin:4px 0 6px; }
+    .waiting .hint { color:var(--muted); font-weight:700; margin:0 0 20px; }
+    .spinner { width:46px; height:46px; margin:8px auto 20px; border-radius:50%; border:5px solid var(--line); border-top-color:var(--accent); animation:spin .9s linear infinite; }
+    .count-badge { display:inline-block; background:var(--pill); color:var(--accent-dark); font-family:"Fredoka",sans-serif; font-weight:600; border-radius:999px; padding:8px 16px; font-size:1rem; }
 
-    .reveal { text-align: center; padding: 8px 0; }
-    .reveal .label { font-weight: 800; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; font-size: 0.8rem; }
-    .team-badge { margin: 16px auto; width: 140px; height: 140px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3.6rem; box-shadow: 0 14px 34px rgba(0,0,0,0.18); animation: pop-in 0.5s cubic-bezier(.2,1.4,.4,1); }
-    .team-name { font-family: "Fredoka", sans-serif; font-size: 2rem; font-weight: 700; margin: 4px 0; line-height: 1.1; }
-    .team-sub { color: var(--muted); font-weight: 700; }
-    .me-pill { margin-top: 16px; display: inline-flex; gap: 8px; align-items: center; background: #fff; border: 2px solid var(--line); border-radius: 999px; padding: 8px 16px; font-weight: 800; }
+    .reveal { text-align:center; padding:8px 0; }
+    .reveal .label { font-weight:800; color:var(--muted); letter-spacing:0.5px; text-transform:uppercase; font-size:0.8rem; }
+    .team-badge { margin:16px auto; width:140px; height:140px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:3.6rem; box-shadow:0 14px 34px rgba(0,0,0,0.18); animation:pop-in .5s cubic-bezier(.2,1.4,.4,1); }
+    .team-name { font-family:"Fredoka",sans-serif; font-size:2rem; font-weight:700; margin:4px 0; line-height:1.1; }
+    .team-sub { color:var(--muted); font-weight:700; }
+    .me-pill { margin-top:16px; display:inline-flex; gap:8px; align-items:center; background:#fff; border:2px solid var(--line); border-radius:999px; padding:8px 16px; font-weight:800; }
 
-    .captain-box { margin-top: 22px; padding-top: 20px; border-top: 2px dashed var(--line); }
-    .captain-badge { font-family: "Fredoka", sans-serif; font-weight: 700; color: var(--accent-dark); background: var(--pill); display: inline-block; padding: 7px 16px; border-radius: 999px; margin-bottom: 14px; }
-    .chef-panel { background: var(--pill); border-radius: 16px; padding: 16px; }
-    .chef-panel .lbl { font-weight: 800; font-size: 0.92rem; color: var(--ink); margin-bottom: 10px; text-align: left; }
-    .chef-panel .row { display: flex; gap: 10px; }
-    .chef-panel input { flex: 1; min-width: 0; font-size: 1rem; padding: 12px 14px; }
-    .chef-panel button { font-family: "Fredoka", sans-serif; font-weight: 600; color: #fff; background: var(--accent); border: none; border-radius: 14px; padding: 0 20px; cursor: pointer; white-space: nowrap; }
-    .chef-panel button:hover { background: var(--accent-dark); }
-    .chef-panel button:disabled { opacity: 0.55; }
-    .saved { color: #1f9d63; font-weight: 800; font-size: 0.9rem; margin-top: 10px; min-height: 1.1em; text-align: left; }
+    .captain-box { margin-top:22px; padding-top:20px; border-top:2px dashed var(--line); }
+    .captain-badge { font-family:"Fredoka",sans-serif; font-weight:700; color:var(--accent-dark); background:var(--pill); display:inline-block; padding:7px 16px; border-radius:999px; margin-bottom:14px; }
+    .chef-panel { background:var(--pill); border-radius:16px; padding:16px; }
+    .chef-panel .lbl { font-weight:800; font-size:0.92rem; color:var(--ink); margin-bottom:10px; text-align:left; }
+    .chef-panel .row { display:flex; gap:10px; }
+    .chef-panel input { flex:1; min-width:0; font-size:1rem; padding:12px 14px; }
+    .chef-panel button { font-family:"Fredoka",sans-serif; font-weight:600; color:#fff; background:var(--accent); border:none; border-radius:14px; padding:0 20px; cursor:pointer; white-space:nowrap; }
+    .chef-panel button:hover { background:var(--accent-dark); } .chef-panel button:disabled { opacity:0.55; }
+    .saved { color:#1f9d63; font-weight:800; font-size:0.9rem; margin-top:10px; min-height:1.1em; text-align:left; }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes pop-in { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: scale(1); } }
-    @media (prefers-reduced-motion: reduce) { .spinner, .team-badge { animation: none; } }
+    .game-theme { font-family:"Fredoka",sans-serif; font-size:1.9rem; font-weight:700; margin-top:14px; }
+    .game-req { color:var(--muted); font-weight:800; margin-top:4px; }
+    .pick { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; justify-content:center; }
+    .pchip { padding:11px 16px; border:2px solid var(--line); border-radius:999px; font-weight:800; cursor:pointer; background:#fff; transition:all .12s; }
+    .pchip.sel { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .pickcount { font-family:"Fredoka",sans-serif; font-weight:600; margin-top:14px; color:var(--muted); }
+    .chosen { margin-top:16px; font-weight:800; }
+    .playing { margin-top:16px; background:#e7f7ee; border:2px solid #aee6c7; color:#14784a; border-radius:14px; padding:16px; font-family:"Fredoka",sans-serif; font-weight:700; font-size:1.3rem; }
+    .waitchef { color:var(--muted); font-weight:700; margin-top:16px; }
+
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes pop-in { from { opacity:0; transform:scale(0.4); } to { opacity:1; transform:scale(1); } }
+    @media (prefers-reduced-motion:reduce) { .spinner,.team-badge { animation:none; } }
   </style>
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>🏆 Edward D'or</h1>
-      <p class="subtitle" id="subtitle">Rejoins la partie !</p>
-    </header>
+    <header><h1>🏆 Edward D'or</h1><p class="subtitle" id="subtitle">Rejoins la partie !</p></header>
     <div id="screen"></div>
   </div>
 
@@ -96,73 +79,47 @@
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const TEAMS = {
-      1: { name: "Rouge", emoji: "🔴", hex: "#e23b2e", bgTop: "#ffd9d4", bgBottom: "#ffc1b8" },
-      2: { name: "Bleu",  emoji: "🔵", hex: "#2f6df0", bgTop: "#d6e4ff", bgBottom: "#bcd2ff" },
-      3: { name: "Vert",  emoji: "🟢", hex: "#1f9d63", bgTop: "#cdf2df", bgBottom: "#b2ead0" },
-      4: { name: "Jaune", emoji: "🟡", hex: "#e8a200", bgTop: "#ffeec2", bgBottom: "#ffe29b" },
+      1: { name:"Rouge", emoji:"🔴", hex:"#e23b2e", bgTop:"#ffd9d4", bgBottom:"#ffc1b8" },
+      2: { name:"Bleu",  emoji:"🔵", hex:"#2f6df0", bgTop:"#d6e4ff", bgBottom:"#bcd2ff" },
+      3: { name:"Vert",  emoji:"🟢", hex:"#1f9d63", bgTop:"#cdf2df", bgBottom:"#b2ead0" },
+      4: { name:"Jaune", emoji:"🟡", hex:"#e8a200", bgTop:"#ffeec2", bgBottom:"#ffe29b" },
     };
     const FAMILIES = [
-      { val: "MOUDA", label: "Mouda" },
-      { val: "POIRIER", label: "Poirier" },
-      { val: "BOUVIER", label: "Bouvier" },
-      { val: "DOUKHAN/DAINNE", label: "Doukhan/Dainne" },
-      { val: "AUTRE", label: "Autre" },
+      { val:"MOUDA", label:"Mouda" }, { val:"POIRIER", label:"Poirier" }, { val:"BOUVIER", label:"Bouvier" },
+      { val:"DOUKHAN/DAINNE", label:"Doukhan/Dainne" }, { val:"AUTRE", label:"Autre" },
     ];
-
     const STORAGE_KEY = "cousinade_player_id";
     const screen = document.getElementById("screen");
     const subtitle = document.getElementById("subtitle");
     let myId = localStorage.getItem(STORAGE_KEY);
-    let myPlayer = null;
-    let myTeam = null;
+    let myPlayer = null, myTeam = null, activeGame = null, teammates = [];
 
     function setBg(top, bottom) { document.body.style.background = `linear-gradient(170deg, ${top}, ${bottom})`; }
     function resetBg() { setBg("#ffe7b8", "#ffd2a6"); }
-    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
 
     function showJoinForm() {
-      resetBg();
-      subtitle.textContent = "Rejoins la partie !";
+      resetBg(); subtitle.textContent = "Rejoins la partie !";
       let sex = null, age = null, fam = null;
       const famHtml = FAMILIES.map((f) => `<div class="choice" data-val="${f.val}">${f.label}</div>`).join("");
       screen.innerHTML = `
         <div class="card">
-          <div class="field">
-            <label for="nameInput">Ton prénom</label>
-            <input id="nameInput" type="text" placeholder="Ex : Léa" autocomplete="off" maxlength="40" />
-          </div>
-          <div class="field">
-            <label>Tu es</label>
-            <div class="choices" id="sexChoices">
-              <div class="choice" data-val="H">Homme</div>
-              <div class="choice" data-val="F">Femme</div>
-            </div>
-          </div>
-          <div class="field">
-            <label>Catégorie</label>
-            <div class="choices" id="ageChoices">
-              <div class="choice" data-val="jeune">Jeune</div>
-              <div class="choice" data-val="senior">Plus trop jeune (essaye de l'être)</div>
-            </div>
-          </div>
-          <div class="field">
-            <label>Ta famille</label>
-            <div class="choices wrap" id="famChoices">${famHtml}</div>
-          </div>
+          <div class="field"><label for="nameInput">Ton prénom</label><input id="nameInput" type="text" placeholder="Ex : Léa" autocomplete="off" maxlength="40" /></div>
+          <div class="field"><label>Tu es</label><div class="choices" id="sexChoices"><div class="choice" data-val="H">Homme</div><div class="choice" data-val="F">Femme</div></div></div>
+          <div class="field"><label>Catégorie</label><div class="choices" id="ageChoices"><div class="choice" data-val="jeune">Jeune</div><div class="choice" data-val="senior">Plus trop jeune (essaye de l'être)</div></div></div>
+          <div class="field"><label>Ta famille</label><div class="choices wrap" id="famChoices">${famHtml}</div></div>
           <button class="cta" id="joinBtn">C'est parti !</button>
         </div>`;
       const nameInput = document.getElementById("nameInput");
       const joinBtn = document.getElementById("joinBtn");
-      function wire(containerId, setter) {
-        const c = document.getElementById(containerId);
+      function wire(id, setter) {
+        const c = document.getElementById(id);
         c.querySelectorAll(".choice").forEach((el) => el.addEventListener("click", () => {
           c.querySelectorAll(".choice").forEach((x) => x.classList.remove("selected"));
           el.classList.add("selected"); setter(el.dataset.val);
         }));
       }
-      wire("sexChoices", (v) => (sex = v));
-      wire("ageChoices", (v) => (age = v));
-      wire("famChoices", (v) => (fam = v));
+      wire("sexChoices", (v) => (sex = v)); wire("ageChoices", (v) => (age = v)); wire("famChoices", (v) => (fam = v));
       joinBtn.addEventListener("click", async () => {
         const name = nameInput.value.trim();
         if (!name) { nameInput.focus(); return; }
@@ -172,27 +129,18 @@
         joinBtn.disabled = true; joinBtn.textContent = "On t'inscrit…";
         const { data, error } = await supabase.from("players").insert({ name, sex, age_group: age, family: fam }).select().single();
         if (error) { alert("Oups : " + error.message); joinBtn.disabled = false; joinBtn.textContent = "C'est parti !"; return; }
-        myPlayer = data; myId = data.id; localStorage.setItem(STORAGE_KEY, myId);
-        showStatus();
+        myPlayer = data; myId = data.id; localStorage.setItem(STORAGE_KEY, myId); showStatus();
       });
     }
 
     function showWaiting() {
-      resetBg();
-      subtitle.textContent = "Tu es bien inscrit·e !";
-      screen.innerHTML = `
-        <div class="card waiting">
-          <div class="spinner"></div>
-          <p class="big">Salut ${escapeHtml(myPlayer.name)} 👋</p>
-          <p class="hint">En attente du tirage des équipes…</p>
-          <span class="count-badge" id="countBadge">…</span>
-        </div>`;
+      resetBg(); subtitle.textContent = "Tu es bien inscrit·e !";
+      screen.innerHTML = `<div class="card waiting"><div class="spinner"></div><p class="big">Salut ${escapeHtml(myPlayer.name)} 👋</p><p class="hint">En attente du tirage des équipes…</p><span class="count-badge" id="countBadge">…</span></div>`;
       updateCount();
     }
     async function updateCount() {
-      const badge = document.getElementById("countBadge");
-      if (!badge) return;
-      const { count } = await supabase.from("players").select("*", { count: "exact", head: true });
+      const badge = document.getElementById("countBadge"); if (!badge) return;
+      const { count } = await supabase.from("players").select("*", { count:"exact", head:true });
       badge.textContent = (count ?? 0) + " cousin·e·s inscrit·e·s";
     }
 
@@ -201,12 +149,19 @@
       const { data } = await supabase.from("teams").select("*").eq("id", myPlayer.team).maybeSingle();
       myTeam = data || null;
     }
+    async function loadActiveGame() {
+      const { data } = await supabase.from("games").select("*").eq("status", "active").maybeSingle();
+      activeGame = data || null;
+    }
+    async function loadTeammates() {
+      if (!myPlayer || !myPlayer.team) { teammates = []; return; }
+      const { data } = await supabase.from("players").select("id,name").eq("team", myPlayer.team).order("name");
+      teammates = data || [];
+    }
 
     function showReveal() {
-      const t = TEAMS[myPlayer.team];
-      if (!t) return showWaiting();
-      setBg(t.bgTop, t.bgBottom);
-      subtitle.textContent = "Le tirage est fait !";
+      const t = TEAMS[myPlayer.team]; if (!t) return showWaiting();
+      setBg(t.bgTop, t.bgBottom); subtitle.textContent = "Le tirage est fait !";
       const custom = myTeam && myTeam.name && myTeam.name.trim();
       const bigName = custom ? escapeHtml(myTeam.name) : `Équipe ${t.name}`;
       const subName = custom ? `Équipe ${t.name}` : "Que le meilleur clan gagne 🏆";
@@ -216,61 +171,79 @@
           <div class="captain-badge">👑 Tu es le chef !</div>
           <div class="chef-panel">
             <div class="lbl">Donne un nom à ton équipe</div>
-            <div class="row">
-              <input id="teamNameInput" type="text" maxlength="30" placeholder="Ex : Les Bisons" value="${custom ? escapeHtml(myTeam.name) : ""}" />
-              <button id="renameBtn">Valider</button>
-            </div>
+            <div class="row"><input id="teamNameInput" type="text" maxlength="30" placeholder="Ex : Les Bisons" value="${custom ? escapeHtml(myTeam.name) : ""}" /><button id="renameBtn">Valider</button></div>
             <div class="saved" id="savedMsg"></div>
           </div>
         </div>` : "";
-      screen.innerHTML = `
-        <div class="card reveal">
-          <div class="label">Ton équipe</div>
-          <div class="team-badge" style="background:${t.hex}">${t.emoji}</div>
-          <div class="team-name" style="color:${t.hex}">${bigName}</div>
-          <div class="team-sub">${subName}</div>
-          <div class="me-pill">👤 ${escapeHtml(myPlayer.name)}</div>
-          ${captainHtml}
-        </div>`;
+      screen.innerHTML = `<div class="card reveal"><div class="label">Ton équipe</div><div class="team-badge" style="background:${t.hex}">${t.emoji}</div><div class="team-name" style="color:${t.hex}">${bigName}</div><div class="team-sub">${subName}</div><div class="me-pill">👤 ${escapeHtml(myPlayer.name)}</div>${captainHtml}</div>`;
       if (isCaptain) {
-        const input = document.getElementById("teamNameInput");
-        const btn = document.getElementById("renameBtn");
-        const saved = document.getElementById("savedMsg");
+        const input = document.getElementById("teamNameInput"), btn = document.getElementById("renameBtn"), saved = document.getElementById("savedMsg");
         const doRename = async () => {
-          const newName = input.value.trim();
-          btn.disabled = true;
+          const newName = input.value.trim(); btn.disabled = true;
           const { error } = await supabase.from("teams").update({ name: newName || null }).eq("id", myPlayer.team);
           btn.disabled = false;
           if (error) { saved.style.color = "#c0392b"; saved.textContent = "Erreur, réessaie."; return; }
-          saved.style.color = "#1f9d63"; saved.textContent = "✓ Nom enregistré !";
-          setTimeout(() => { if (saved) saved.textContent = ""; }, 2500);
+          saved.style.color = "#1f9d63"; saved.textContent = "✓ Nom enregistré !"; setTimeout(() => { if (saved) saved.textContent = ""; }, 2500);
         };
         btn.addEventListener("click", doRename);
         input.addEventListener("keydown", (e) => { if (e.key === "Enter") doRename(); });
       }
     }
 
+    function showGame() {
+      const t = TEAMS[myPlayer.team]; if (!t) return showWaiting();
+      setBg(t.bgTop, t.bgBottom); subtitle.textContent = "Jeu en cours !";
+      const required = activeGame.required || 1;
+      const selected = (myTeam && Array.isArray(myTeam.selected)) ? myTeam.selected : [];
+      const isCaptain = myTeam && myTeam.captain_id === myId;
+      const nameOf = (id) => { const m = teammates.find((x) => x.id === id); return m ? m.name : "?"; };
+      let body = `<div class="label">Jeu en cours · Équipe ${t.name}</div><div class="game-theme" style="color:${t.hex}">${escapeHtml(activeGame.theme)}</div><div class="game-req">Votre équipe envoie ${required} joueur${required > 1 ? "s" : ""}</div>`;
+      if (isCaptain) {
+        const chips = teammates.map((m) => `<span class="pchip ${selected.includes(m.id) ? "sel" : ""}" data-pick="${m.id}">${escapeHtml(m.name)}</span>`).join("");
+        body += `<div class="pick">${chips}</div><div class="pickcount">${selected.length}/${required} choisi${selected.length > 1 ? "s" : ""}</div>`;
+        if (selected.includes(myId)) body += `<div class="playing">👉 Tu joues aussi !</div>`;
+      } else {
+        if (!myTeam || !myTeam.captain_id) body += `<div class="waitchef">Aucun chef désigné pour ton équipe — voir l'organisateur.</div>`;
+        else if (selected.length === 0) body += `<div class="waitchef">⏳ Ton chef choisit les joueurs…</div>`;
+        else {
+          body += `<div class="chosen">Désigné·e·s : ${selected.map(nameOf).map(escapeHtml).join(", ")}</div>`;
+          if (selected.includes(myId)) body += `<div class="playing">👉 C'est toi qui joues !</div>`;
+        }
+      }
+      screen.innerHTML = `<div class="card reveal">${body}<div class="me-pill" style="margin-top:18px">👤 ${escapeHtml(myPlayer.name)}</div></div>`;
+      if (isCaptain) screen.querySelectorAll("[data-pick]").forEach((el) => el.addEventListener("click", () => togglePick(el.dataset.pick, required)));
+    }
+
+    async function togglePick(pid, required) {
+      let sel = (myTeam && Array.isArray(myTeam.selected)) ? myTeam.selected.slice() : [];
+      if (sel.includes(pid)) sel = sel.filter((x) => x !== pid);
+      else if (sel.length < required) sel.push(pid);
+      else return;
+      myTeam.selected = sel; showGame();
+      const { error } = await supabase.from("teams").update({ selected: sel }).eq("id", myPlayer.team);
+      if (error) alert("Erreur : " + error.message);
+    }
+
     async function showStatus() {
-      if (myPlayer && myPlayer.team) { await loadMyTeam(); showReveal(); }
-      else showWaiting();
+      if (myPlayer && myPlayer.team) {
+        await loadMyTeam(); await loadActiveGame();
+        if (activeGame) { await loadTeammates(); showGame(); } else showReveal();
+      } else showWaiting();
     }
 
     function subscribeRealtime() {
       supabase.channel("player-watch")
-        .on("postgres_changes", { event: "INSERT", schema: "public", table: "players" }, () => updateCount())
-        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "players" }, (p) => {
-          if (p.new.id === myId) { myPlayer = p.new; showStatus(); }
-        })
-        .on("postgres_changes", { event: "DELETE", schema: "public", table: "players" }, (p) => {
-          if (p.old.id === myId) { localStorage.removeItem(STORAGE_KEY); myId = null; myPlayer = null; myTeam = null; showJoinForm(); }
-        })
-        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "teams" }, (p) => {
+        .on("postgres_changes", { event:"INSERT", schema:"public", table:"players" }, () => updateCount())
+        .on("postgres_changes", { event:"UPDATE", schema:"public", table:"players" }, (p) => { if (p.new.id === myId) { myPlayer = p.new; showStatus(); } })
+        .on("postgres_changes", { event:"DELETE", schema:"public", table:"players" }, (p) => { if (p.old.id === myId) { localStorage.removeItem(STORAGE_KEY); myId = null; myPlayer = null; myTeam = null; showJoinForm(); } })
+        .on("postgres_changes", { event:"UPDATE", schema:"public", table:"teams" }, (p) => {
           if (myPlayer && myPlayer.team && p.new.id === myPlayer.team) {
-            const typing = document.activeElement && document.activeElement.id === "teamNameInput";
             myTeam = p.new;
-            if (!typing) showReveal();
+            if (activeGame) showGame();
+            else { const typing = document.activeElement && document.activeElement.id === "teamNameInput"; if (!typing) showReveal(); }
           }
         })
+        .on("postgres_changes", { event:"*", schema:"public", table:"games" }, () => showStatus())
         .subscribe();
     }
 
@@ -287,9 +260,8 @@
     async function init() {
       if (myId) {
         const { data } = await supabase.from("players").select("*").eq("id", myId).maybeSingle();
-        if (data) { myPlayer = data; showStatus(); }
-        else { localStorage.removeItem(STORAGE_KEY); myId = null; showJoinForm(); }
-      } else { showJoinForm(); }
+        if (data) { myPlayer = data; showStatus(); } else { localStorage.removeItem(STORAGE_KEY); myId = null; showJoinForm(); }
+      } else showJoinForm();
       subscribeRealtime();
     }
     init();

@@ -330,7 +330,7 @@
           captainHtml = `<div class="captain-box"><div class="captain-badge">👑 Tu es le chef</div><br/><button class="editbtn" id="openEditor">✏️ Modifier mon équipe</button></div>`;
         }
       }
-      screen.innerHTML = `<div class="card reveal"><div class="label">Ton équipe</div>${badge}<div class="team-name" style="color:${t.hex}">${bigName}</div><div class="team-sub">${subName}</div><div class="me-pill">${avatarImg(myPlayer.photo, "me-ava", "👤")} ${escapeHtml(myPlayer.name)}</div><div class="secret-box"><div class="secret-label">🕵️ Votre mot espion</div><div class="secret-word" style="color:${t.hex}">${escapeHtml(SECRET_WORDS[myPlayer.team].toUpperCase())}</div><div class="secret-hint">Faites-le dire à une autre équipe, l'air de rien 😏 (page Défis)</div></div>${captainHtml}</div>`;
+      screen.innerHTML = `<div class="card reveal"><div class="label">Ton équipe</div>${badge}<div class="team-name" style="color:${t.hex}">${bigName}</div><div class="team-sub">${subName}</div><div class="me-pill">${avatarImg(myPlayer.photo, "me-ava", "👤")} ${escapeHtml(myPlayer.name)}</div>${captainHtml}</div>`;
 
       if (isCaptain) {
         const openBtn = document.getElementById("openEditor");

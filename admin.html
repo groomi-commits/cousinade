@@ -133,6 +133,7 @@
       { key:"cri_equipe", emoji:"🎤", title:"Cri d'équipe", repeatable:false, live:true, points:3 },
     ];
     const ADEFI = Object.fromEntries(DEFIS.map((d) => [d.key, d]));
+    const SECRET_WORDS = { 1:"banane", 2:"tracteur", 3:"chaussette", 4:"moustache" };
     const famLabel = (v) => { const f = FAMILIES.find((x) => x.val === v); return f ? f.label : (v || "?"); };
 
     const dyn = document.getElementById("dynamic");
@@ -291,10 +292,14 @@
 
       const bank = [1,2,3,4].map((t) => `<div class="live-row"><span class="swatch" style="background:${TEAMS[t].hex}"></span><span class="nm">${escapeHtml(teamName(t))}</span><span class="bank-pts">${teamDefiPoints(t)} pts cachés</span></div>`).join("");
 
+      const words = [1,2,3,4].map((t) => `<div class="live-row"><span class="swatch" style="background:${TEAMS[t].hex}"></span><span class="nm">${escapeHtml(teamName(t))}</span><span class="bank-pts">🔑 ${escapeHtml(SECRET_WORDS[t])}</span></div>`).join("");
+
       return `<div class="card"><h2>🎯 Défis — validation</h2>
         <p class="addhint">Valide les preuves envoyées par les joueurs. Ces points restent <b>cachés</b> jusqu'à la révélation finale. 🤫</p>
         <div class="subs">${queueHtml}</div>
         ${live}
+        <h2 class="sub-h2">🕵️ Mots espions (référence pour valider)</h2>
+        ${words}
         <h2 class="sub-h2">💰 Points défis en réserve (cachés des joueurs)</h2>
         ${bank}</div>`;
     }

@@ -111,6 +111,11 @@
     .declare-box textarea { width:100%; font-family:inherit; font-size:1rem; padding:12px 14px; border:2px solid var(--line); border-radius:12px; resize:vertical; min-height:64px; outline:none; }
     .declare-box textarea:focus { border-color:var(--accent); box-shadow:0 0 0 4px var(--ring); }
     .declare-row { display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap; }
+    .secret-box { margin-top:18px; background:rgba(255,255,255,0.78); border:2px dashed var(--line); border-radius:16px; padding:14px 16px; }
+    .secret-label { font-weight:800; color:var(--muted); font-size:0.82rem; text-transform:uppercase; letter-spacing:0.5px; }
+    .secret-word { font-family:"Fredoka",sans-serif; font-weight:700; font-size:1.9rem; letter-spacing:1px; margin:2px 0; }
+    .secret-hint { color:var(--muted); font-weight:700; font-size:0.84rem; }
+    .secret-inline { background:var(--pill); border-radius:10px; padding:10px 12px; font-weight:800; margin:0 0 12px; text-align:left; color:var(--accent-dark); }
 
     .menu { position:fixed; inset:0; background:rgba(58,46,34,0.5); display:flex; justify-content:flex-end; z-index:50; }
     .menu[hidden] { display:none; }
@@ -164,11 +169,12 @@
       { key:"objet_couleur", emoji:"🎨", title:"L'objet de ta couleur", points:1, mode:"photo", repeatable:false,
         rule:"Trouve un objet de la couleur de ton équipe et prends-le en photo. 1 point, une seule fois." },
       { key:"mot_espion", emoji:"🕵️", title:"Le mot espion", points:3, mode:"declaration", repeatable:false,
-        rule:"Ton équipe a un mot secret (demande-le à l'organisateur·rice). Le but : faire prononcer ce mot par quelqu'un d'une AUTRE équipe, l'air de rien, sans qu'il ou elle s'en doute. Quand c'est fait, déclare-le ici — ajoute un selfie avec ta victime si tu peux ! 3 points." },
+        rule:"Votre équipe a un mot secret (affiché juste en dessous 👇). Le but : le faire prononcer par quelqu'un d'une AUTRE équipe, l'air de rien, sans qu'il ou elle s'en doute. Quand c'est fait, déclarez le coup ici — avec un selfie de la victime si vous pouvez ! 3 points." },
       { key:"cri_equipe", emoji:"🎤", title:"Le cri d'équipe", points:3, mode:"live", repeatable:false,
         rule:"Inventez ensemble un cri, un chant ou un haka qui représente votre équipe, puis interprétez-le EN LIVE devant l'organisateur·rice. Plus c'est fort et synchro, mieux c'est. 3 points." },
     ];
     const DEFI_BY_KEY = Object.fromEntries(DEFIS.map((d) => [d.key, d]));
+    const SECRET_WORDS = { 1:"banane", 2:"tracteur", 3:"chaussette", 4:"moustache" };
     const STORAGE_KEY = "cousinade_player_id";
 
     const screen = document.getElementById("screen");
@@ -324,7 +330,7 @@
           captainHtml = `<div class="captain-box"><div class="captain-badge">👑 Tu es le chef</div><br/><button class="editbtn" id="openEditor">✏️ Modifier mon équipe</button></div>`;
         }
       }
-      screen.innerHTML = `<div class="card reveal"><div class="label">Ton équipe</div>${badge}<div class="team-name" style="color:${t.hex}">${bigName}</div><div class="team-sub">${subName}</div><div class="me-pill">${avatarImg(myPlayer.photo, "me-ava", "👤")} ${escapeHtml(myPlayer.name)}</div>${captainHtml}</div>`;
+      screen.innerHTML = `<div class="card reveal"><div class="label">Ton équipe</div>${badge}<div class="team-name" style="color:${t.hex}">${bigName}</div><div class="team-sub">${subName}</div><div class="me-pill">${avatarImg(myPlayer.photo, "me-ava", "👤")} ${escapeHtml(myPlayer.name)}</div><div class="secret-box"><div class="secret-label">🕵️ Votre mot espion</div><div class="secret-word" style="color:${t.hex}">${escapeHtml(SECRET_WORDS[myPlayer.team].toUpperCase())}</div><div class="secret-hint">Faites-le dire à une autre équipe, l'air de rien 😏 (page Défis)</div></div>${captainHtml}</div>`;
 
       if (isCaptain) {
         const openBtn = document.getElementById("openEditor");
@@ -434,7 +440,7 @@
           if (d.mode === "photo") action = `<button class="defi-btn" data-photo="${d.key}">📸 Envoyer ma preuve</button>`;
           else if (d.mode === "declaration") action = `<button class="defi-btn" data-declare="${d.key}">🕵️ Déclarer le coup</button>`;
         }
-        return `<div class="card defi-card"><div class="defi-head"><span class="defi-emoji">${d.emoji}</span><div class="defi-titles"><div class="defi-title">${d.title}</div><div class="defi-pts">${d.points} pt${d.points > 1 ? "s" : ""}${d.repeatable ? " / preuve" : ""}</div></div></div><p class="defi-rule">${d.rule}</p><div class="defi-foot">${badge}${action}</div><div class="defi-msg" id="msg-${d.key}"></div></div>`;
+        return `<div class="card defi-card"><div class="defi-head"><span class="defi-emoji">${d.emoji}</span><div class="defi-titles"><div class="defi-title">${d.title}</div><div class="defi-pts">${d.points} pt${d.points > 1 ? "s" : ""}${d.repeatable ? " / preuve" : ""}</div></div></div><p class="defi-rule">${d.rule}</p>${(d.key === "mot_espion" && hasTeam) ? `<div class="secret-inline">🔑 Votre mot secret : <b>${escapeHtml(SECRET_WORDS[myPlayer.team])}</b></div>` : ""}<div class="defi-foot">${badge}${action}</div><div class="defi-msg" id="msg-${d.key}"></div></div>`;
       }).join("");
       screen.innerHTML = intro + cards;
       screen.querySelectorAll("[data-photo]").forEach((b) => b.addEventListener("click", () => sendPhoto(b.dataset.photo)));
@@ -465,7 +471,7 @@
     function openDeclare(key) {
       const card = document.getElementById("msg-" + key); if (!card) return;
       const d = DEFI_BY_KEY[key];
-      card.innerHTML = `<div class="declare-box"><textarea id="decl-text" maxlength="160" placeholder="Ex : on a fait dire « banane » à Tonton Gégé !"></textarea><div class="declare-row"><div class="avatar-preview sm" id="decl-prev">📷</div><label class="photo-btn">Selfie (option)<input id="decl-photo" type="file" accept="image/*" hidden /></label><button class="defi-btn" id="decl-send">Envoyer</button></div></div>`;
+      card.innerHTML = `<div class="declare-box"><textarea id="decl-text" maxlength="160" placeholder="Ex : on a fait dire « banane » à Tonton Seb !"></textarea><div class="declare-row"><div class="avatar-preview sm" id="decl-prev">📷</div><label class="photo-btn">Selfie (option)<input id="decl-photo" type="file" accept="image/*" hidden /></label><button class="defi-btn" id="decl-send">Envoyer</button></div></div>`;
       let declPhoto = null;
       const prev = document.getElementById("decl-prev"), pInput = document.getElementById("decl-photo");
       pInput.addEventListener("change", async () => { const f = pInput.files[0]; if (!f) return; try { declPhoto = await compressImage(f); prev.innerHTML = `<img src="${declPhoto}" alt="" />`; } catch {} });

@@ -138,6 +138,11 @@
     .prow .bpts { font-family:"Fredoka",sans-serif; font-size:1.35rem; flex:none; }
     .prow.champ { box-shadow:0 12px 34px rgba(0,0,0,0.16); border-width:3px; }
 
+    .palm-card { text-align:center; margin-bottom:14px; position:relative; }
+    .palm-year { display:inline-block; background:var(--pill); color:var(--accent-dark); font-family:"Fredoka",sans-serif; font-weight:700; border-radius:999px; padding:5px 16px; font-size:0.95rem; margin-bottom:8px; }
+    .palm-champ { font-family:"Fredoka",sans-serif; font-weight:700; font-size:1.5rem; color:var(--ink); line-height:1.15; }
+    .palm-note { color:var(--muted); font-weight:700; margin-top:6px; }
+
     .menu { position:fixed; inset:0; background:rgba(58,46,34,0.5); display:flex; justify-content:flex-end; z-index:50; }
     .menu[hidden] { display:none; }
     .menu-inner { background:var(--card); width:82%; max-width:320px; height:100%; padding:22px 18px; display:flex; flex-direction:column; gap:10px; box-shadow:-10px 0 40px rgba(0,0,0,0.25); }
@@ -213,7 +218,7 @@
 
     let myId = localStorage.getItem(STORAGE_KEY);
     let myPlayer = null, myTeam = null, activeGame = null, teammates = [], allTeams = {}, scoresData = [], mySubs = [];
-    let finalePhase = "playing", revealStep = 0, allPlayers = [], approvedSubs = [], allVotes = [], myVotes = {}, openCat = null;
+    let finalePhase = "playing", revealStep = 0, allPlayers = [], approvedSubs = [], allVotes = [], myVotes = {}, openCat = null, palmaresData = [];
     let currentView = "main", editorOpen = false;
 
     function setBg(top, bottom) { document.body.style.background = `linear-gradient(170deg, ${top}, ${bottom})`; }
@@ -270,6 +275,10 @@
       const { data } = await supabase.from("state").select("phase,step").eq("id", 1).maybeSingle();
       finalePhase = data ? data.phase : "playing"; revealStep = data ? (data.step || 0) : 0;
     }
+    async function loadPalmares() {
+      const { data } = await supabase.from("palmares").select("id,year,champion,note").order("year", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false });
+      palmaresData = data || [];
+    }
     async function loadVotesP() {
       const [vR, mvR] = await Promise.all([
         supabase.from("votes").select("category,candidate_id"),
@@ -284,7 +293,7 @@
     }
     async function loadContext() {
       if (!myPlayer) return;
-      await loadTeams(); await loadScores(); await loadActiveGame(); await loadSubs(); await loadState();
+      await loadTeams(); await loadScores(); await loadActiveGame(); await loadSubs(); await loadState(); await loadPalmares();
       if (myPlayer.team && activeGame) await loadTeammates(); else teammates = [];
       if (finalePhase !== "playing") await loadFinale();
     }
@@ -458,6 +467,16 @@
     function placeholderView(ico, title, text) {
       resetBg(); subtitle.textContent = "";
       screen.innerHTML = `<div class="card placeholder"><div class="ico">${ico}</div><h2>${title}</h2><p>${text}</p><p>🚧 Bientôt disponible !</p></div>`;
+    }
+
+    function palmaresView() {
+      resetBg(); subtitle.textContent = "Le mur des champions 🏆";
+      if (!palmaresData.length) {
+        screen.innerHTML = `<div class="card placeholder"><div class="ico">🏆</div><h2>Palmarès</h2><p>Le palmarès s'écrit cette année…</p><p>Le clan qui remportera l'Edward D'or rejoindra la légende de la cousinade !</p></div>`;
+        return;
+      }
+      const cards = palmaresData.map((e) => `<div class="card palm-card">${e.year ? `<div class="palm-year">${escapeHtml(String(e.year))}</div>` : ""}<div class="palm-champ">🏆 ${escapeHtml(e.champion)}</div>${e.note ? `<div class="palm-note">${escapeHtml(e.note)}</div>` : ""}</div>`).join("");
+      screen.innerHTML = `<div class="card defi-intro"><div class="ico">🏅</div><p>Les clans qui ont gravé leur nom dans l'histoire de la cousinade.</p></div>${cards}`;
     }
 
     // ---------- DÉFIS ----------
@@ -644,7 +663,7 @@
       if (finalePhase === "reveal") { burger.hidden = true; menu.hidden = true; return revealView(); }
       burger.hidden = false; updateMenuActive();
       if (currentView === "classement") return classementView();
-      if (currentView === "palmares") return placeholderView("🏅", "Palmarès", "Les vainqueurs des éditions passées s'afficheront ici.");
+      if (currentView === "palmares") return palmaresView();
       if (currentView === "defis") return defisView();
       if (!myPlayer.team) { showWaiting(); return; }
       if (activeGame) { showGame(); return; }
@@ -659,6 +678,7 @@
     async function onSubs() { await loadSubs(); if (finalePhase !== "playing") { await loadApprovedP(); renderCurrent(); } else if (currentView === "defis") defisView(); }
     async function onState() { await loadState(); if (finalePhase !== "playing" && !allPlayers.length) await loadFinale(); renderCurrent(); }
     async function onVotes() { if (finalePhase !== "playing") { await loadVotesP(); renderCurrent(); } }
+    async function onPalmares() { await loadPalmares(); if (currentView === "palmares") palmaresView(); }
     function subscribeRealtime() {
       supabase.channel("player-watch")
         .on("postgres_changes", { event:"INSERT", schema:"public", table:"players" }, () => updateCount())
@@ -670,6 +690,7 @@
         .on("postgres_changes", { event:"*", schema:"public", table:"submissions" }, () => onSubs())
         .on("postgres_changes", { event:"*", schema:"public", table:"state" }, () => onState())
         .on("postgres_changes", { event:"*", schema:"public", table:"votes" }, () => onVotes())
+        .on("postgres_changes", { event:"*", schema:"public", table:"palmares" }, () => onPalmares())
         .subscribe();
     }
 

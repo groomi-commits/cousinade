@@ -147,7 +147,7 @@
     const dyn = document.getElementById("dynamic");
     let players = [], teamsData = {}, gamesData = [], scoresData = [], activeGame = null, pendingTheme = null;
     let subsPending = [], subsApproved = [];
-    let statePhase = "playing", stateStep = 0, votesData = [];
+    let statePhase = "playing", stateStep = 0, votesData = [], palmaresData = [];
 
     function teamDefiPoints(t) {
       let total = 0; const seen = new Set();
@@ -195,7 +195,7 @@
     addName.addEventListener("keydown", (e) => { if (e.key === "Enter") addBtn.click(); });
 
     async function load() {
-      const [pRes, tRes, gRes, sRes, subPRes, subARes, stRes, vRes] = await Promise.all([
+      const [pRes, tRes, gRes, sRes, subPRes, subARes, stRes, vRes, palRes] = await Promise.all([
         supabase.from("players").select("id,name,sex,age_group,family,team,draft_team,created_at").order("created_at", { ascending: true }),
         supabase.from("teams").select("id,name,captain_id,selected").order("id"),
         supabase.from("games").select("*").order("position", { ascending: true }),
@@ -204,6 +204,7 @@
         supabase.from("submissions").select("defi,team,points").eq("status", "approved"),
         supabase.from("state").select("phase,step").eq("id", 1).maybeSingle(),
         supabase.from("votes").select("category,candidate_id,voter_id"),
+        supabase.from("palmares").select("id,year,champion,note").order("year", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }),
       ]);
       if (pRes.error) { dyn.innerHTML = `<div class="card"><div class="empty">Erreur : ${escapeHtml(pRes.error.message)}</div></div>`; return; }
       players = pRes.data || [];
@@ -215,6 +216,7 @@
       statePhase = stRes.data ? stRes.data.phase : "playing";
       stateStep = stRes.data ? (stRes.data.step || 0) : 0;
       votesData = vRes.data || [];
+      palmaresData = palRes.data || [];
       activeGame = gamesData.find((g) => g.status === "active") || null;
       render();
     }
@@ -363,6 +365,15 @@
         <div class="btns" style="margin-top:12px"><button id="cancelFinaleBtn" class="ghost">↩️ Terminer / revenir au jeu</button></div></div>`;
     }
 
+    function palmaresCardHtml() {
+      const list = palmaresData.length
+        ? palmaresData.map((e) => `<div class="live-row"><span class="nm">${e.year ? `<b>${escapeHtml(String(e.year))}</b> · ` : ""}${escapeHtml(e.champion)}${e.note ? ` <span class="muted">— ${escapeHtml(e.note)}</span>` : ""}</span><button class="danger" data-delpalm="${e.id}">✕</button></div>`).join("")
+        : `<div class="empty">Aucune édition enregistrée pour l'instant.</div>`;
+      return `<div class="card"><h2>🏅 Palmarès</h2><p class="addhint">Grave les vainqueurs (anciens comme nouveaux). Tout le monde le voit sur la page Palmarès.</p>${list}
+        <div class="btns" style="margin-top:14px"><button id="gravePalmBtn" class="reveal">🏆 Graver le champion ${new Date().getFullYear()}</button></div>
+        <div class="btns" style="margin-top:10px"><button id="addPalmBtn" class="ghost">➕ Ajouter une édition à la main</button></div></div>`;
+    }
+
     function render() {
       const total = players.length;
       const hasDraft = players.some((p) => p.draft_team != null);
@@ -407,6 +418,8 @@
       if (revealed) html += gamesCardHtml(revealed);
       if (revealed) html += defisCardHtml();
 
+      html += palmaresCardHtml();
+
       html += `<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px"><span style="color:var(--muted);font-weight:800">Repartir de zéro pour un test</span><button id="wipeBtn" class="danger">🗑️ Tout effacer</button></div>`;
 
       dyn.innerHTML = html;
@@ -435,6 +448,9 @@
       if (g("prevStepBtn")) g("prevStepBtn").addEventListener("click", () => setStep(-1));
       if (g("nextStepBtn")) g("nextStepBtn").addEventListener("click", () => setStep(1));
       if (g("cancelFinaleBtn")) g("cancelFinaleBtn").addEventListener("click", cancelFinale);
+      if (g("gravePalmBtn")) g("gravePalmBtn").addEventListener("click", gravePalmares);
+      if (g("addPalmBtn")) g("addPalmBtn").addEventListener("click", addPalmares);
+      dyn.querySelectorAll("[data-delpalm]").forEach((el) => el.addEventListener("click", () => deletePalmares(el.dataset.delpalm)));
     }
 
     function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
@@ -573,6 +589,34 @@
       if (error) { alert("Erreur : " + error.message); return; }
       await load();
     }
+    async function addPalmares() {
+      const year = prompt("Année de l'édition :", new Date().getFullYear());
+      if (year === null) return;
+      const champion = prompt("Nom du clan / vainqueur :");
+      if (champion === null) return;
+      const c = champion.trim(); if (!c) return;
+      const note = prompt("Petite note (optionnel) :", "");
+      if (note === null) return;
+      const y = parseInt(year, 10);
+      const { error } = await supabase.from("palmares").insert({ year: isNaN(y) ? null : y, champion: c, note: note.trim() || null });
+      if (error) { alert("Erreur : " + error.message); return; }
+      await load();
+    }
+    async function gravePalmares() {
+      const res = awardWinnersA();
+      const ranking = [1,2,3,4].map((t) => ({ t, total: teamTotal(t) + teamDefiPoints(t) + awardPointsA(t, res) })).sort((a, b) => b.total - a.total || a.t - b.t);
+      const champT = ranking[0].t, champName = teamName(champT), y = new Date().getFullYear();
+      if (!confirm(`Graver « ${champName} » comme champion ${y} au palmarès ?`)) return;
+      const { error } = await supabase.from("palmares").insert({ year: y, champion: champName, note: "Vainqueur de l'Edward D'or" });
+      if (error) { alert("Erreur : " + error.message); return; }
+      await load();
+    }
+    async function deletePalmares(id) {
+      if (!confirm("Retirer cette édition du palmarès ?")) return;
+      const { error } = await supabase.from("palmares").delete().eq("id", id);
+      if (error) { alert("Erreur : " + error.message); return; }
+      await load();
+    }
 
     supabase.channel("admin-watch")
       .on("postgres_changes", { event:"*", schema:"public", table:"players" }, () => load())
@@ -582,6 +626,7 @@
       .on("postgres_changes", { event:"*", schema:"public", table:"submissions" }, () => load())
       .on("postgres_changes", { event:"*", schema:"public", table:"state" }, () => load())
       .on("postgres_changes", { event:"*", schema:"public", table:"votes" }, () => load())
+      .on("postgres_changes", { event:"*", schema:"public", table:"palmares" }, () => load())
       .subscribe();
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") load(); });
     window.addEventListener("focus", load);

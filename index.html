@@ -87,6 +87,31 @@
     .placeholder h2 { font-family:"Fredoka",sans-serif; margin:0 0 8px; }
     .placeholder p { color:var(--muted); font-weight:700; margin:4px 0; }
 
+    .defi-intro { text-align:center; margin-bottom:16px; }
+    .defi-intro .ico { font-size:2.6rem; }
+    .defi-intro p { color:var(--ink); font-weight:700; margin:8px 0 0; line-height:1.45; }
+    .defi-locked { color:var(--muted) !important; margin-top:10px !important; }
+    .defi-card { margin-bottom:14px; }
+    .defi-head { display:flex; align-items:center; gap:12px; }
+    .defi-emoji { font-size:1.9rem; flex:none; }
+    .defi-titles { text-align:left; }
+    .defi-title { font-family:"Fredoka",sans-serif; font-weight:700; font-size:1.2rem; line-height:1.1; }
+    .defi-pts { color:var(--accent-dark); font-weight:800; font-size:0.82rem; }
+    .defi-rule { color:var(--muted); font-weight:600; font-size:0.95rem; line-height:1.45; margin:12px 0; text-align:left; }
+    .defi-foot { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+    .defi-btn { font-family:"Fredoka",sans-serif; font-weight:600; font-size:0.98rem; color:#fff; background:var(--accent); border:none; border-radius:12px; padding:11px 16px; cursor:pointer; }
+    .defi-btn:hover { background:var(--accent-dark); }
+    .defi-count { background:var(--pill); color:var(--accent-dark); font-weight:800; border-radius:999px; padding:7px 14px; font-size:0.88rem; }
+    .defi-ok { background:#e7f7ee; color:#14784a; font-weight:800; border-radius:999px; padding:7px 14px; font-size:0.9rem; }
+    .defi-pending { background:#fff4e0; color:#b6791f; font-weight:800; border-radius:999px; padding:7px 14px; font-size:0.9rem; }
+    .defi-todo { color:var(--muted); font-weight:800; font-size:0.9rem; }
+    .defi-msg { font-weight:800; font-size:0.9rem; margin-top:4px; text-align:left; }
+    .avatar-preview.sm { width:48px; height:48px; font-size:1.2rem; }
+    .declare-box { margin-top:12px; }
+    .declare-box textarea { width:100%; font-family:inherit; font-size:1rem; padding:12px 14px; border:2px solid var(--line); border-radius:12px; resize:vertical; min-height:64px; outline:none; }
+    .declare-box textarea:focus { border-color:var(--accent); box-shadow:0 0 0 4px var(--ring); }
+    .declare-row { display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap; }
+
     .menu { position:fixed; inset:0; background:rgba(58,46,34,0.5); display:flex; justify-content:flex-end; z-index:50; }
     .menu[hidden] { display:none; }
     .menu-inner { background:var(--card); width:82%; max-width:320px; height:100%; padding:22px 18px; display:flex; flex-direction:column; gap:10px; box-shadow:-10px 0 40px rgba(0,0,0,0.25); }
@@ -131,6 +156,19 @@
       4: { name:"Jaune", emoji:"🟡", hex:"#e8a200", bgTop:"#ffeec2", bgBottom:"#ffe29b" },
     };
     const FAMILIES = [ {val:"MOUDA",label:"Mouda"}, {val:"POIRIER",label:"Poirier"}, {val:"BOUVIER",label:"Bouvier"}, {val:"DOUKHAN/DAINNE",label:"Doukhan/Dainne"}, {val:"AUTRE",label:"Autre"} ];
+    const DEFIS = [
+      { key:"autocollant", emoji:"🔖", title:"Chasse aux autocollants", points:1, mode:"photo", repeatable:true,
+        rule:"Des autocollants sont cachés un peu partout dans la maison. Déniche-les et photographie chacun ! Chaque autocollant validé rapporte 1 point à ton équipe — alors ouvre l'œil, il y en a plein." },
+      { key:"selfie_familles", emoji:"🤳", title:"Le selfie des 5 familles", points:3, mode:"photo", repeatable:false,
+        rule:"Réunis sur UN seul selfie au moins une personne de chacune des 5 familles (Mouda, Poirier, Bouvier, Doukhan/Dainne, Autre). Réussi une fois : 3 points pour l'équipe." },
+      { key:"objet_couleur", emoji:"🎨", title:"L'objet de ta couleur", points:1, mode:"photo", repeatable:false,
+        rule:"Trouve un objet de la couleur de ton équipe et prends-le en photo. 1 point, une seule fois." },
+      { key:"mot_espion", emoji:"🕵️", title:"Le mot espion", points:3, mode:"declaration", repeatable:false,
+        rule:"Ton équipe a un mot secret (demande-le à l'organisateur·rice). Le but : faire prononcer ce mot par quelqu'un d'une AUTRE équipe, l'air de rien, sans qu'il ou elle s'en doute. Quand c'est fait, déclare-le ici — ajoute un selfie avec ta victime si tu peux ! 3 points." },
+      { key:"cri_equipe", emoji:"🎤", title:"Le cri d'équipe", points:3, mode:"live", repeatable:false,
+        rule:"Inventez ensemble un cri, un chant ou un haka qui représente votre équipe, puis interprétez-le EN LIVE devant l'organisateur·rice. Plus c'est fort et synchro, mieux c'est. 3 points." },
+    ];
+    const DEFI_BY_KEY = Object.fromEntries(DEFIS.map((d) => [d.key, d]));
     const STORAGE_KEY = "cousinade_player_id";
 
     const screen = document.getElementById("screen");
@@ -139,7 +177,7 @@
     const menu = document.getElementById("menu");
 
     let myId = localStorage.getItem(STORAGE_KEY);
-    let myPlayer = null, myTeam = null, activeGame = null, teammates = [], allTeams = {}, scoresData = [];
+    let myPlayer = null, myTeam = null, activeGame = null, teammates = [], allTeams = {}, scoresData = [], mySubs = [];
     let currentView = "main", editorOpen = false;
 
     function setBg(top, bottom) { document.body.style.background = `linear-gradient(170deg, ${top}, ${bottom})`; }
@@ -187,9 +225,14 @@
       const { data } = await supabase.from("players").select("id,name,photo").eq("team", myPlayer.team).order("name");
       teammates = data || [];
     }
+    async function loadSubs() {
+      if (!myPlayer || !myPlayer.team) { mySubs = []; return; }
+      const { data } = await supabase.from("submissions").select("id,defi,status,player_id").eq("team", myPlayer.team);
+      mySubs = data || [];
+    }
     async function loadContext() {
       if (!myPlayer) return;
-      await loadTeams(); await loadScores(); await loadActiveGame();
+      await loadTeams(); await loadScores(); await loadActiveGame(); await loadSubs();
       if (myPlayer.team && activeGame) await loadTeammates(); else teammates = [];
     }
 
@@ -364,13 +407,91 @@
       screen.innerHTML = `<div class="card placeholder"><div class="ico">${ico}</div><h2>${title}</h2><p>${text}</p><p>🚧 Bientôt disponible !</p></div>`;
     }
 
+    // ---------- DÉFIS ----------
+    function defiStatus(d) {
+      const subs = mySubs.filter((s) => s.defi === d.key);
+      const approved = subs.filter((s) => s.status === "approved");
+      const pending = subs.filter((s) => s.status === "pending");
+      return { approved: approved.length, pending: pending.length, done: approved.length > 0 };
+    }
+    function defisView() {
+      resetBg(); subtitle.textContent = "Des points cachés à grappiller…";
+      const hasTeam = myPlayer && myPlayer.team;
+      const intro = `<div class="card defi-intro"><div class="ico">🎯</div><p>Relevez ces défis tout au long de la journée pour rapporter des points à votre équipe. <strong>Surprise :</strong> ces points restent cachés et seront révélés d'un coup à la grande finale ! 🤫</p>${hasTeam ? "" : `<p class="defi-locked">🔒 Les défis s'activent dès que les équipes sont tirées.</p>`}</div>`;
+      const cards = DEFIS.map((d) => {
+        const st = defiStatus(d);
+        let badge = "", action = "";
+        if (d.repeatable) {
+          badge = `<span class="defi-count">${st.approved} validé${st.approved > 1 ? "s" : ""}${st.pending ? ` · ${st.pending} en attente` : ""}</span>`;
+          if (hasTeam) action = `<button class="defi-btn" data-photo="${d.key}">📸 Envoyer une preuve</button>`;
+        } else if (st.done) {
+          badge = `<span class="defi-ok">✓ Validé !</span>`;
+        } else if (st.pending) {
+          badge = `<span class="defi-pending">⏳ En attente de validation…</span>`;
+        } else if (d.mode === "live") {
+          badge = `<span class="defi-todo">🎤 À faire en live devant l'orga</span>`;
+        } else if (hasTeam) {
+          if (d.mode === "photo") action = `<button class="defi-btn" data-photo="${d.key}">📸 Envoyer ma preuve</button>`;
+          else if (d.mode === "declaration") action = `<button class="defi-btn" data-declare="${d.key}">🕵️ Déclarer le coup</button>`;
+        }
+        return `<div class="card defi-card"><div class="defi-head"><span class="defi-emoji">${d.emoji}</span><div class="defi-titles"><div class="defi-title">${d.title}</div><div class="defi-pts">${d.points} pt${d.points > 1 ? "s" : ""}${d.repeatable ? " / preuve" : ""}</div></div></div><p class="defi-rule">${d.rule}</p><div class="defi-foot">${badge}${action}</div><div class="defi-msg" id="msg-${d.key}"></div></div>`;
+      }).join("");
+      screen.innerHTML = intro + cards;
+      screen.querySelectorAll("[data-photo]").forEach((b) => b.addEventListener("click", () => sendPhoto(b.dataset.photo)));
+      screen.querySelectorAll("[data-declare]").forEach((b) => b.addEventListener("click", () => openDeclare(b.dataset.declare)));
+    }
+
+    let photoTarget = null, fileEl = null;
+    function ensureFileInput() {
+      if (fileEl) return fileEl;
+      fileEl = document.createElement("input");
+      fileEl.type = "file"; fileEl.accept = "image/*"; fileEl.hidden = true;
+      fileEl.addEventListener("change", async () => {
+        const file = fileEl.files[0]; fileEl.value = "";
+        if (!file || !photoTarget) return;
+        const key = photoTarget; photoTarget = null;
+        const msg = document.getElementById("msg-" + key);
+        if (msg) { msg.style.color = "var(--muted)"; msg.textContent = "Envoi en cours…"; }
+        try {
+          const photo = await compressImage(file);
+          await submitDefi(key, { photo });
+        } catch { if (msg) { msg.style.color = "#c0392b"; msg.textContent = "Oups, image illisible."; } }
+      });
+      document.body.appendChild(fileEl);
+      return fileEl;
+    }
+    function sendPhoto(key) { photoTarget = key; ensureFileInput().click(); }
+
+    function openDeclare(key) {
+      const card = document.getElementById("msg-" + key); if (!card) return;
+      const d = DEFI_BY_KEY[key];
+      card.innerHTML = `<div class="declare-box"><textarea id="decl-text" maxlength="160" placeholder="Ex : on a fait dire « banane » à Tonton Gégé !"></textarea><div class="declare-row"><div class="avatar-preview sm" id="decl-prev">📷</div><label class="photo-btn">Selfie (option)<input id="decl-photo" type="file" accept="image/*" hidden /></label><button class="defi-btn" id="decl-send">Envoyer</button></div></div>`;
+      let declPhoto = null;
+      const prev = document.getElementById("decl-prev"), pInput = document.getElementById("decl-photo");
+      pInput.addEventListener("change", async () => { const f = pInput.files[0]; if (!f) return; try { declPhoto = await compressImage(f); prev.innerHTML = `<img src="${declPhoto}" alt="" />`; } catch {} });
+      document.getElementById("decl-send").addEventListener("click", async () => {
+        const note = document.getElementById("decl-text").value.trim();
+        if (!note) { document.getElementById("decl-text").focus(); return; }
+        await submitDefi(key, { note, photo: declPhoto });
+      });
+    }
+
+    async function submitDefi(key, { photo = null, note = null }) {
+      const d = DEFI_BY_KEY[key];
+      const { error } = await supabase.from("submissions").insert({ defi: key, team: myPlayer.team, player_id: myId, photo, note, points: d.points, status: "pending" });
+      if (error) { const msg = document.getElementById("msg-" + key); if (msg) { msg.style.color = "#c0392b"; msg.textContent = "Erreur : " + error.message; } return; }
+      await loadSubs(); defisView();
+      const msg = document.getElementById("msg-" + key);
+      if (msg) { msg.style.color = "#1f9d63"; msg.textContent = "✓ Envoyé ! En attente de validation 🤫"; }
+    }
+
     // ---------- ROUTER ----------
     function renderCurrent() {
       if (!myPlayer) { burger.hidden = true; menu.hidden = true; showJoinForm(); return; }
       burger.hidden = false; updateMenuActive();
       if (currentView === "classement") return classementView();
       if (currentView === "palmares") return placeholderView("🏅", "Palmarès", "Les vainqueurs des éditions passées s'afficheront ici.");
-      if (currentView === "defis") return placeholderView("🎯", "Défis", "Des défis bonus à relever pour gagner des points.");
+      if (currentView === "defis") return defisView();
       if (!myPlayer.team) { showWaiting(); return; }
       if (activeGame) { showGame(); return; }
       const typing = document.activeElement && ["teamNameInput"].includes(document.activeElement.id);
@@ -381,6 +502,7 @@
     async function onTeams() { await loadTeams(); renderCurrent(); }
     async function onScores() { await loadScores(); renderCurrent(); }
     async function onGames() { await loadActiveGame(); if (myPlayer && myPlayer.team && activeGame) await loadTeammates(); renderCurrent(); }
+    async function onSubs() { await loadSubs(); if (currentView === "defis") defisView(); }
     function subscribeRealtime() {
       supabase.channel("player-watch")
         .on("postgres_changes", { event:"INSERT", schema:"public", table:"players" }, () => updateCount())
@@ -389,6 +511,7 @@
         .on("postgres_changes", { event:"*", schema:"public", table:"teams" }, () => onTeams())
         .on("postgres_changes", { event:"*", schema:"public", table:"games" }, () => onGames())
         .on("postgres_changes", { event:"*", schema:"public", table:"scores" }, () => onScores())
+        .on("postgres_changes", { event:"*", schema:"public", table:"submissions" }, () => onSubs())
         .subscribe();
     }
 

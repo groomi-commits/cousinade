@@ -82,6 +82,20 @@
     .selrow .swatch { display:inline-block; vertical-align:middle; margin-right:6px; }
     .empty { color:var(--muted); font-weight:700; text-align:center; padding:14px 0; }
     .note { color:var(--muted); font-weight:700; font-size:0.88rem; margin-top:10px; text-align:center; }
+    .subs { display:flex; flex-direction:column; gap:12px; }
+    .sub { border:2px solid var(--line); border-radius:14px; padding:12px; }
+    .sub-info { display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:0.95rem; }
+    .sub-info .muted, .muted { color:var(--muted); font-weight:700; }
+    .sub-photo { display:block; width:160px; height:160px; object-fit:cover; border-radius:12px; margin:10px 0; }
+    .sub-note { background:#faf4ec; border-radius:10px; padding:10px 12px; font-weight:700; margin:10px 0; }
+    .sub-btns { display:flex; gap:8px; }
+    .sub-btns button { flex:1; }
+    .sub-h2 { margin-top:18px; font-size:0.95rem; }
+    .live-row { display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--line); }
+    .live-row .nm { flex:1; font-weight:800; }
+    .live-row button.small { min-width:auto; padding:8px 14px; font-size:0.88rem; flex:none; }
+    .badge-ok { background:#e7f7ee; color:#14784a; font-weight:800; border-radius:999px; padding:6px 12px; font-size:0.85rem; }
+    .bank-pts { font-weight:800; color:var(--muted); }
     @media (max-width:460px) { .teams { grid-template-columns:1fr; } }
   </style>
 </head>
@@ -111,10 +125,29 @@
 
     const TEAMS = { 1:{name:"Rouge",emoji:"🔴",hex:"#e23b2e"}, 2:{name:"Bleu",emoji:"🔵",hex:"#2f6df0"}, 3:{name:"Vert",emoji:"🟢",hex:"#1f9d63"}, 4:{name:"Jaune",emoji:"🟡",hex:"#e8a200"} };
     const FAMILIES = [ {val:"MOUDA",label:"Mouda"}, {val:"POIRIER",label:"Poirier"}, {val:"BOUVIER",label:"Bouvier"}, {val:"DOUKHAN/DAINNE",label:"Doukhan/Dainne"}, {val:"AUTRE",label:"Autre"} ];
+    const DEFIS = [
+      { key:"autocollant", emoji:"🔖", title:"Chasse aux autocollants", repeatable:true },
+      { key:"selfie_familles", emoji:"🤳", title:"Selfie des 5 familles", repeatable:false },
+      { key:"objet_couleur", emoji:"🎨", title:"Objet de ta couleur", repeatable:false },
+      { key:"mot_espion", emoji:"🕵️", title:"Mot espion", repeatable:false },
+      { key:"cri_equipe", emoji:"🎤", title:"Cri d'équipe", repeatable:false, live:true, points:3 },
+    ];
+    const ADEFI = Object.fromEntries(DEFIS.map((d) => [d.key, d]));
     const famLabel = (v) => { const f = FAMILIES.find((x) => x.val === v); return f ? f.label : (v || "?"); };
 
     const dyn = document.getElementById("dynamic");
     let players = [], teamsData = {}, gamesData = [], scoresData = [], activeGame = null, pendingTheme = null;
+    let subsPending = [], subsApproved = [];
+
+    function teamDefiPoints(t) {
+      let total = 0; const seen = new Set();
+      subsApproved.filter((s) => s.team === t).forEach((s) => {
+        const d = ADEFI[s.defi];
+        if (d && !d.repeatable) { if (seen.has(s.defi)) return; seen.add(s.defi); }
+        total += s.points;
+      });
+      return total;
+    }
 
     function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
     const sexLabel = (s) => (s === "H" ? "H" : s === "F" ? "F" : "?");
@@ -152,17 +185,21 @@
     addName.addEventListener("keydown", (e) => { if (e.key === "Enter") addBtn.click(); });
 
     async function load() {
-      const [pRes, tRes, gRes, sRes] = await Promise.all([
+      const [pRes, tRes, gRes, sRes, subPRes, subARes] = await Promise.all([
         supabase.from("players").select("id,name,sex,age_group,family,team,draft_team,created_at").order("created_at", { ascending: true }),
         supabase.from("teams").select("id,name,captain_id,selected").order("id"),
         supabase.from("games").select("*").order("position", { ascending: true }),
         supabase.from("scores").select("*"),
+        supabase.from("submissions").select("id,defi,team,player_id,photo,note,points,created_at").eq("status", "pending").order("created_at", { ascending: true }),
+        supabase.from("submissions").select("defi,team,points").eq("status", "approved"),
       ]);
       if (pRes.error) { dyn.innerHTML = `<div class="card"><div class="empty">Erreur : ${escapeHtml(pRes.error.message)}</div></div>`; return; }
       players = pRes.data || [];
       teamsData = {}; (tRes.data || []).forEach((t) => (teamsData[t.id] = t));
       gamesData = gRes.data || [];
       scoresData = sRes.data || [];
+      subsPending = subPRes.data || [];
+      subsApproved = subARes.data || [];
       activeGame = gamesData.find((g) => g.status === "active") || null;
       render();
     }
@@ -231,6 +268,37 @@
       return `<div class="card"><h2>🎡 Jeux de l'après-midi</h2><p class="addhint">${done}/${gamesData.length} jeux faits. Clique le thème tiré à la roue.</p>${inner}</div>`;
     }
 
+    function defisCardHtml() {
+      const queue = subsPending.map((s) => {
+        const d = ADEFI[s.defi] || { emoji:"❓", title:s.defi };
+        const media = s.photo ? `<img class="sub-photo" src="${s.photo}" alt="preuve" />` : "";
+        const note = s.note ? `<div class="sub-note">💬 « ${escapeHtml(s.note)} »</div>` : "";
+        return `<div class="sub">
+          <div class="sub-info"><span class="swatch" style="background:${TEAMS[s.team].hex}"></span><b>${d.emoji} ${escapeHtml(d.title)}</b><span class="muted"> · ${escapeHtml(teamName(s.team))} · ${escapeHtml(nameById(s.player_id))} · +${s.points}</span></div>
+          ${media}${note}
+          <div class="sub-btns"><button class="reveal" data-approve="${s.id}">✓ Valider</button><button class="danger" data-reject="${s.id}">✗ Refuser</button></div>
+        </div>`;
+      }).join("");
+      const queueHtml = subsPending.length ? queue : `<div class="empty">Aucune preuve en attente.</div>`;
+
+      const live = DEFIS.filter((d) => d.live).map((d) => {
+        const rows = [1,2,3,4].map((t) => {
+          const isDone = subsApproved.some((s) => s.team === t && s.defi === d.key);
+          return `<div class="live-row"><span class="swatch" style="background:${TEAMS[t].hex}"></span><span class="nm">${escapeHtml(teamName(t))}</span>${isDone ? `<span class="badge-ok">✓ +${d.points}</span>` : `<button class="ghost small" data-award="${d.key}|${t}">Valider +${d.points}</button>`}</div>`;
+        }).join("");
+        return `<h2 class="sub-h2">${d.emoji} ${escapeHtml(d.title)} — validation live</h2>${rows}`;
+      }).join("");
+
+      const bank = [1,2,3,4].map((t) => `<div class="live-row"><span class="swatch" style="background:${TEAMS[t].hex}"></span><span class="nm">${escapeHtml(teamName(t))}</span><span class="bank-pts">${teamDefiPoints(t)} pts cachés</span></div>`).join("");
+
+      return `<div class="card"><h2>🎯 Défis — validation</h2>
+        <p class="addhint">Valide les preuves envoyées par les joueurs. Ces points restent <b>cachés</b> jusqu'à la révélation finale. 🤫</p>
+        <div class="subs">${queueHtml}</div>
+        ${live}
+        <h2 class="sub-h2">💰 Points défis en réserve (cachés des joueurs)</h2>
+        ${bank}</div>`;
+    }
+
     function render() {
       const total = players.length;
       const hasDraft = players.some((p) => p.draft_team != null);
@@ -272,6 +340,7 @@
 
       if (revealed) html += classementCardHtml();
       if (revealed) html += gamesCardHtml(revealed);
+      if (revealed) html += defisCardHtml();
 
       html += `<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px"><span style="color:var(--muted);font-weight:800">Repartir de zéro pour un test</span><button id="wipeBtn" class="danger">🗑️ Tout effacer</button></div>`;
 
@@ -293,6 +362,9 @@
       dyn.querySelectorAll("[data-delgame]").forEach((el) => el.addEventListener("click", (e) => { e.stopPropagation(); deleteGame(el.dataset.delgame); }));
       dyn.querySelectorAll("[data-addteam]").forEach((el) => el.addEventListener("click", () => addScore(parseInt(el.dataset.addteam, 10))));
       dyn.querySelectorAll("[data-delscore]").forEach((el) => el.addEventListener("click", () => deleteScore(el.dataset.delscore)));
+      dyn.querySelectorAll("[data-approve]").forEach((el) => el.addEventListener("click", () => reviewSub(el.dataset.approve, "approved")));
+      dyn.querySelectorAll("[data-reject]").forEach((el) => el.addEventListener("click", () => reviewSub(el.dataset.reject, "rejected")));
+      dyn.querySelectorAll("[data-award]").forEach((el) => el.addEventListener("click", () => { const [k, t] = el.dataset.award.split("|"); awardLive(k, parseInt(t, 10)); }));
     }
 
     function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
@@ -395,12 +467,25 @@
       if (error) { alert("Erreur : " + error.message); return; }
       await load();
     }
+    async function reviewSub(id, status) {
+      const { error } = await supabase.from("submissions").update({ status }).eq("id", id);
+      if (error) { alert("Erreur : " + error.message); return; }
+      await load();
+    }
+    async function awardLive(key, team) {
+      const d = ADEFI[key]; if (!d) return;
+      if (subsApproved.some((s) => s.team === team && s.defi === key)) return;
+      const { error } = await supabase.from("submissions").insert({ defi: key, team, player_id: null, points: d.points, status: "approved" });
+      if (error) { alert("Erreur : " + error.message); return; }
+      await load();
+    }
 
     supabase.channel("admin-watch")
       .on("postgres_changes", { event:"*", schema:"public", table:"players" }, () => load())
       .on("postgres_changes", { event:"*", schema:"public", table:"teams" }, () => load())
       .on("postgres_changes", { event:"*", schema:"public", table:"games" }, () => load())
       .on("postgres_changes", { event:"*", schema:"public", table:"scores" }, () => load())
+      .on("postgres_changes", { event:"*", schema:"public", table:"submissions" }, () => load())
       .subscribe();
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") load(); });
     window.addEventListener("focus", load);

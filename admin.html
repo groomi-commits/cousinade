@@ -70,6 +70,15 @@
     .launchbar { margin-top:14px; font-weight:800; display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:var(--pill); padding:12px 14px; border-radius:12px; }
     .selrow { padding:9px 4px; border-top:1px solid var(--line); font-weight:700; font-size:0.95rem; }
     .selrow:first-of-type { border-top:none; }
+    .scoreboard { display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+    .scorerow { display:flex; align-items:center; gap:10px; background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:10px 12px; }
+    .scorerow .rk { font-size:1.2rem; flex:none; }
+    .scorerow .sname { flex:1; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .scorerow .pts { font-family:"Fredoka",sans-serif; font-weight:700; color:var(--accent-dark); flex:none; }
+    .scorerow .addbtn { flex:none; min-width:auto; padding:8px 12px; font-size:0.9rem; }
+    .history { display:flex; flex-direction:column; gap:6px; margin-top:10px; }
+    .histrow { display:flex; align-items:center; gap:8px; font-weight:700; font-size:0.9rem; }
+    .histrow .x { margin-left:auto; }
     .selrow .swatch { display:inline-block; vertical-align:middle; margin-right:6px; }
     .empty { color:var(--muted); font-weight:700; text-align:center; padding:14px 0; }
     .note { color:var(--muted); font-weight:700; font-size:0.88rem; margin-top:10px; text-align:center; }
@@ -105,7 +114,7 @@
     const famLabel = (v) => { const f = FAMILIES.find((x) => x.val === v); return f ? f.label : (v || "?"); };
 
     const dyn = document.getElementById("dynamic");
-    let players = [], teamsData = {}, gamesData = [], activeGame = null, pendingTheme = null;
+    let players = [], teamsData = {}, gamesData = [], scoresData = [], activeGame = null, pendingTheme = null;
 
     function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
     const sexLabel = (s) => (s === "H" ? "H" : s === "F" ? "F" : "?");
@@ -113,6 +122,7 @@
     const teamName = (t) => (teamsData[t] && teamsData[t].name && teamsData[t].name.trim()) ? teamsData[t].name : `Équipe ${TEAMS[t].name}`;
     const nameById = (id) => { const p = players.find((x) => x.id === id); return p ? p.name : "?"; };
     const requiredLabel = (n) => (n === 0 ? "toute l'équipe" : `${n} joueur${n > 1 ? "s" : ""} par équipe`);
+    const teamTotal = (t) => scoresData.filter((s) => s.team === t).reduce((a, s) => a + s.points, 0);
 
     document.getElementById("addFam").innerHTML = FAMILIES.map((f) => `<div class="choice" data-val="${f.val}">${f.label}</div>`).join("");
     let addSex = null, addAge = null, addFam = null;
@@ -142,15 +152,17 @@
     addName.addEventListener("keydown", (e) => { if (e.key === "Enter") addBtn.click(); });
 
     async function load() {
-      const [pRes, tRes, gRes] = await Promise.all([
+      const [pRes, tRes, gRes, sRes] = await Promise.all([
         supabase.from("players").select("*").order("created_at", { ascending: true }),
         supabase.from("teams").select("*"),
         supabase.from("games").select("*").order("position", { ascending: true }),
+        supabase.from("scores").select("*"),
       ]);
       if (pRes.error) { dyn.innerHTML = `<div class="card"><div class="empty">Erreur : ${escapeHtml(pRes.error.message)}</div></div>`; return; }
       players = pRes.data || [];
       teamsData = {}; (tRes.data || []).forEach((t) => (teamsData[t.id] = t));
       gamesData = gRes.data || [];
+      scoresData = sRes.data || [];
       activeGame = gamesData.find((g) => g.status === "active") || null;
       render();
     }
@@ -176,6 +188,15 @@
       const isCap = captainId && p.id === captainId;
       const chips = [1,2,3,4].map((t) => `<span class="chip ${p.draft_team === t ? "current" : ""}" style="background:${TEAMS[t].hex}" ${p.draft_team === t ? "" : `data-move-id="${p.id}" data-move-team="${t}"`} title="${TEAMS[t].name}"></span>`).join("");
       return `<div class="member"><span class="nm">${isCap ? "👑 " : ""}${escapeHtml(p.name)} <span class="fam">${escapeHtml(famLabel(p.family))}</span></span><span class="ctrls"><span class="chips">${chips}</span><span class="x" data-del="${p.id}" data-name="${escapeHtml(p.name)}">✕</span></span></div>`;
+    }
+
+    function classementCardHtml() {
+      const medals = ["🥇","🥈","🥉","4️⃣"];
+      const ranked = [1,2,3,4].map((t) => ({ t, total: teamTotal(t) })).sort((a, b) => b.total - a.total || a.t - b.t);
+      const rows = ranked.map((r, i) => `<div class="scorerow"><span class="rk">${medals[i]}</span><span class="swatch" style="background:${TEAMS[r.t].hex}"></span><span class="sname">${escapeHtml(teamName(r.t))}</span><span class="pts">${r.total} pts</span><button class="mini addbtn" data-addteam="${r.t}">＋ pts</button></div>`).join("");
+      const recent = scoresData.slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 6);
+      const hist = recent.length ? recent.map((s) => `<div class="histrow"><span class="swatch" style="background:${TEAMS[s.team].hex}"></span>${s.points > 0 ? "+" : ""}${s.points} pts${s.label ? " · " + escapeHtml(s.label) : ""}<span class="x" data-delscore="${s.id}">✕</span></div>`).join("") : `<div class="empty" style="padding:8px 0">Aucun point pour l'instant.</div>`;
+      return `<div class="card"><h2>🏆 Classement</h2><p class="addhint">Clique "＋ pts" pour donner (ou retirer) des points à une équipe.</p><div class="scoreboard">${rows}</div><h2 style="margin-top:16px;font-size:0.95rem">Derniers points</h2><div class="history">${hist}</div></div>`;
     }
 
     function gamesCardHtml(revealed) {
@@ -249,6 +270,7 @@
           <div class="btns" style="margin-top:10px"><button id="drawBtn" class="ghost">🎲 Refaire le tirage</button><button id="clearBtn" class="ghost">Annuler le tirage</button></div></div>`;
       }
 
+      if (revealed) html += classementCardHtml();
       if (revealed) html += gamesCardHtml(revealed);
 
       html += `<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px"><span style="color:var(--muted);font-weight:800">Repartir de zéro pour un test</span><button id="wipeBtn" class="danger">🗑️ Tout effacer</button></div>`;
@@ -269,6 +291,8 @@
       dyn.querySelectorAll("[data-launch]").forEach((el) => el.addEventListener("click", () => launchGame(pendingTheme, parseInt(el.dataset.launch, 10))));
       if (g("addGameBtn")) g("addGameBtn").addEventListener("click", addGame);
       dyn.querySelectorAll("[data-delgame]").forEach((el) => el.addEventListener("click", (e) => { e.stopPropagation(); deleteGame(el.dataset.delgame); }));
+      dyn.querySelectorAll("[data-addteam]").forEach((el) => el.addEventListener("click", () => addScore(parseInt(el.dataset.addteam, 10))));
+      dyn.querySelectorAll("[data-delscore]").forEach((el) => el.addEventListener("click", () => deleteScore(el.dataset.delscore)));
     }
 
     function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
@@ -355,11 +379,28 @@
       if (pendingTheme === theme) pendingTheme = null;
       await load();
     }
+    async function addScore(team) {
+      const v = prompt(`Points pour ${teamName(team)} (un nombre ; négatif pour retirer) :`);
+      if (v === null) return;
+      const n = parseInt(v, 10);
+      if (isNaN(n)) { alert("Entre un nombre."); return; }
+      const label = activeGame ? activeGame.theme : null;
+      const { error } = await supabase.from("scores").insert({ team, points: n, label });
+      if (error) { alert("Erreur : " + error.message); return; }
+      await load();
+    }
+    async function deleteScore(id) {
+      if (!confirm("Supprimer cette entrée de points ?")) return;
+      const { error } = await supabase.from("scores").delete().eq("id", id);
+      if (error) { alert("Erreur : " + error.message); return; }
+      await load();
+    }
 
     supabase.channel("admin-watch")
       .on("postgres_changes", { event:"*", schema:"public", table:"players" }, () => load())
       .on("postgres_changes", { event:"*", schema:"public", table:"teams" }, () => load())
       .on("postgres_changes", { event:"*", schema:"public", table:"games" }, () => load())
+      .on("postgres_changes", { event:"*", schema:"public", table:"scores" }, () => load())
       .subscribe();
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") load(); });
     window.addEventListener("focus", load);

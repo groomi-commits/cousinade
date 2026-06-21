@@ -60,6 +60,14 @@
     .chosen { margin-top:16px; font-weight:800; }
     .playing { margin-top:16px; background:#e7f7ee; border:2px solid #aee6c7; color:#14784a; border-radius:14px; padding:16px; font-family:"Fredoka",sans-serif; font-weight:700; font-size:1.3rem; }
     .waitchef { color:var(--muted); font-weight:700; margin-top:16px; }
+    .board { margin-top:22px; padding-top:20px; border-top:2px dashed var(--line); }
+    .board h3 { font-family:"Fredoka",sans-serif; font-size:1.15rem; margin:0 0 12px; text-align:center; }
+    .brow { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:12px; margin-bottom:7px; background:#fff; border:2px solid transparent; font-weight:800; }
+    .brow.me { border-color:var(--accent); }
+    .brank { font-size:1.1rem; flex:none; }
+    .bswatch { width:14px; height:14px; border-radius:50%; flex:none; }
+    .bname { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
+    .bpts { font-family:"Fredoka",sans-serif; font-weight:700; flex:none; }
 
     @keyframes spin { to { transform:rotate(360deg); } }
     @keyframes pop-in { from { opacity:0; transform:scale(0.4); } to { opacity:1; transform:scale(1); } }
@@ -92,7 +100,7 @@
     const screen = document.getElementById("screen");
     const subtitle = document.getElementById("subtitle");
     let myId = localStorage.getItem(STORAGE_KEY);
-    let myPlayer = null, myTeam = null, activeGame = null, teammates = [];
+    let myPlayer = null, myTeam = null, activeGame = null, teammates = [], allTeams = {}, scoresData = [];
 
     function setBg(top, bottom) { document.body.style.background = `linear-gradient(170deg, ${top}, ${bottom})`; }
     function resetBg() { setBg("#ffe7b8", "#ffd2a6"); }
@@ -144,10 +152,22 @@
       badge.textContent = (count ?? 0) + " cousin·e·s inscrit·e·s";
     }
 
-    async function loadMyTeam() {
-      if (!myPlayer || !myPlayer.team) { myTeam = null; return; }
-      const { data } = await supabase.from("teams").select("*").eq("id", myPlayer.team).maybeSingle();
-      myTeam = data || null;
+    async function loadTeams() {
+      const { data } = await supabase.from("teams").select("*");
+      allTeams = {}; (data || []).forEach((t) => (allTeams[t.id] = t));
+      myTeam = (myPlayer && myPlayer.team) ? (allTeams[myPlayer.team] || null) : null;
+    }
+    async function loadScores() {
+      const { data } = await supabase.from("scores").select("team,points");
+      scoresData = data || [];
+    }
+    const teamTotal = (t) => scoresData.filter((s) => s.team === t).reduce((a, s) => a + s.points, 0);
+    const teamDisplayName = (t) => (allTeams[t] && allTeams[t].name && allTeams[t].name.trim()) ? allTeams[t].name : `Équipe ${TEAMS[t].name}`;
+    function leaderboardHtml() {
+      const medals = ["🥇","🥈","🥉","4️⃣"];
+      const ranked = [1,2,3,4].map((t) => ({ t, total: teamTotal(t) })).sort((a, b) => b.total - a.total || a.t - b.t);
+      const rows = ranked.map((r, i) => `<div class="brow ${r.t === myPlayer.team ? "me" : ""}"><span class="brank">${medals[i]}</span><span class="bswatch" style="background:${TEAMS[r.t].hex}"></span><span class="bname">${escapeHtml(teamDisplayName(r.t))}</span><span class="bpts">${r.total} pts</span></div>`).join("");
+      return `<div class="board"><h3>🏆 Classement</h3>${rows}</div>`;
     }
     async function loadActiveGame() {
       const { data } = await supabase.from("games").select("*").eq("status", "active").maybeSingle();
@@ -175,7 +195,7 @@
             <div class="saved" id="savedMsg"></div>
           </div>
         </div>` : "";
-      screen.innerHTML = `<div class="card reveal"><div class="label">Ton équipe</div><div class="team-badge" style="background:${t.hex}">${t.emoji}</div><div class="team-name" style="color:${t.hex}">${bigName}</div><div class="team-sub">${subName}</div><div class="me-pill">👤 ${escapeHtml(myPlayer.name)}</div>${captainHtml}</div>`;
+      screen.innerHTML = `<div class="card reveal"><div class="label">Ton équipe</div><div class="team-badge" style="background:${t.hex}">${t.emoji}</div><div class="team-name" style="color:${t.hex}">${bigName}</div><div class="team-sub">${subName}</div><div class="me-pill">👤 ${escapeHtml(myPlayer.name)}</div>${captainHtml}${leaderboardHtml()}</div>`;
       if (isCaptain) {
         const input = document.getElementById("teamNameInput"), btn = document.getElementById("renameBtn"), saved = document.getElementById("savedMsg");
         const doRename = async () => {
@@ -229,8 +249,9 @@
 
     async function showStatus() {
       if (myPlayer && myPlayer.team) {
-        await loadMyTeam(); await loadActiveGame();
-        if (activeGame) { await loadTeammates(); showGame(); } else showReveal();
+        await loadTeams(); await loadScores(); await loadActiveGame();
+        if (activeGame) { await loadTeammates(); showGame(); }
+        else { const typing = document.activeElement && document.activeElement.id === "teamNameInput"; if (!typing) showReveal(); }
       } else showWaiting();
     }
 
@@ -239,14 +260,9 @@
         .on("postgres_changes", { event:"INSERT", schema:"public", table:"players" }, () => updateCount())
         .on("postgres_changes", { event:"UPDATE", schema:"public", table:"players" }, (p) => { if (p.new.id === myId) { myPlayer = p.new; showStatus(); } })
         .on("postgres_changes", { event:"DELETE", schema:"public", table:"players" }, (p) => { if (p.old.id === myId) { localStorage.removeItem(STORAGE_KEY); myId = null; myPlayer = null; myTeam = null; showJoinForm(); } })
-        .on("postgres_changes", { event:"UPDATE", schema:"public", table:"teams" }, (p) => {
-          if (myPlayer && myPlayer.team && p.new.id === myPlayer.team) {
-            myTeam = p.new;
-            if (activeGame) showGame();
-            else { const typing = document.activeElement && document.activeElement.id === "teamNameInput"; if (!typing) showReveal(); }
-          }
-        })
+        .on("postgres_changes", { event:"*", schema:"public", table:"teams" }, () => showStatus())
         .on("postgres_changes", { event:"*", schema:"public", table:"games" }, () => showStatus())
+        .on("postgres_changes", { event:"*", schema:"public", table:"scores" }, () => showStatus())
         .subscribe();
     }
 

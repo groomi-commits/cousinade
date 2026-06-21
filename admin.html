@@ -63,7 +63,8 @@
     .capselect { display:flex; align-items:center; gap:6px; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); font-weight:800; font-size:0.82rem; color:var(--muted); }
     .capselect select { flex:1; font-family:inherit; font-weight:700; font-size:0.88rem; padding:7px 8px; border:1.5px solid var(--line); border-radius:9px; background:#fff; color:var(--ink); margin:0; }
     .gthemes { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:12px; }
-    .gtheme { font-family:"Fredoka",sans-serif; font-weight:600; text-align:center; padding:14px 8px; border:2px solid var(--line); border-radius:12px; background:#fff; cursor:pointer; transition:all .12s; }
+    .gtheme { position:relative; font-family:"Fredoka",sans-serif; font-weight:600; text-align:center; padding:14px 22px; border:2px solid var(--line); border-radius:12px; background:#fff; cursor:pointer; transition:all .12s; }
+    .gtheme .gx { position:absolute; top:5px; right:5px; width:20px; height:20px; font-size:0.78rem; }
     .gtheme.sel { border-color:var(--accent); background:var(--pill); color:var(--accent-dark); }
     .gtheme.done { color:var(--muted); background:#efe7dc; cursor:default; border-style:dashed; }
     .launchbar { margin-top:14px; font-weight:800; display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:var(--pill); padding:12px 14px; border-radius:12px; }
@@ -111,6 +112,7 @@
     const ageLabel = (a) => (a === "jeune" ? "Jeune" : a === "senior" ? "Sénior" : "?");
     const teamName = (t) => (teamsData[t] && teamsData[t].name && teamsData[t].name.trim()) ? teamsData[t].name : `Équipe ${TEAMS[t].name}`;
     const nameById = (id) => { const p = players.find((x) => x.id === id); return p ? p.name : "?"; };
+    const requiredLabel = (n) => (n === 0 ? "toute l'équipe" : `${n} joueur${n > 1 ? "s" : ""} par équipe`);
 
     document.getElementById("addFam").innerHTML = FAMILIES.map((f) => `<div class="choice" data-val="${f.val}">${f.label}</div>`).join("");
     let addSex = null, addAge = null, addFam = null;
@@ -180,24 +182,30 @@
       const done = gamesData.filter((g) => g.status === "done").length;
       let inner;
       if (activeGame) {
-        const noCaptain = [1,2,3,4].some((t) => teamsData[t] && !teamsData[t].captain_id);
+        const all = activeGame.required === 0;
+        const noCaptain = !all && [1,2,3,4].some((t) => teamsData[t] && !teamsData[t].captain_id);
         const rows = [1,2,3,4].map((t) => {
+          if (all) {
+            const n = players.filter((p) => p.team === t).length;
+            return `<div class="selrow"><span class="swatch" style="background:${TEAMS[t].hex}"></span><b>${escapeHtml(teamName(t))}</b> : toute l'équipe <span style="color:var(--muted)">(${n} joueur·s)</span></div>`;
+          }
           const sel = (teamsData[t] && Array.isArray(teamsData[t].selected)) ? teamsData[t].selected : [];
           const names = sel.map((id) => escapeHtml(nameById(id)));
           const txt = names.length ? names.join(", ") : `<span style="color:var(--muted)">en attente du chef…</span>`;
           return `<div class="selrow"><span class="swatch" style="background:${TEAMS[t].hex}"></span><b>${escapeHtml(teamName(t))}</b> : ${txt} <span style="color:var(--muted)">(${names.length}/${activeGame.required})</span></div>`;
         }).join("");
-        inner = `<div class="banner ok" style="margin-bottom:8px">🎯 En cours : <b>${escapeHtml(activeGame.theme)}</b> — ${activeGame.required} joueur${activeGame.required > 1 ? "s" : ""} par équipe</div>
+        inner = `<div class="banner ok" style="margin-bottom:8px">🎯 En cours : <b>${escapeHtml(activeGame.theme)}</b> — ${requiredLabel(activeGame.required)}</div>
           ${noCaptain ? `<div class="banner warn">⚠️ Une ou plusieurs équipes n'ont pas de chef — désigne-les plus haut pour qu'ils puissent choisir.</div>` : ""}
           <div>${rows}</div>
           <div class="btns" style="margin-top:14px"><button id="endGameBtn" class="reveal">✅ Terminer ce jeu</button><button id="cancelGameBtn" class="ghost">Annuler</button></div>`;
       } else {
         const cards = gamesData.map((g) => {
-          if (g.status === "done") return `<div class="gtheme done">✓ ${escapeHtml(g.theme)}</div>`;
-          return `<div class="gtheme ${pendingTheme === g.theme ? "sel" : ""}" data-theme="${escapeHtml(g.theme)}">${escapeHtml(g.theme)}</div>`;
+          const isDone = g.status === "done";
+          return `<div class="gtheme ${isDone ? "done" : (pendingTheme === g.theme ? "sel" : "")}" ${isDone ? "" : `data-theme="${escapeHtml(g.theme)}"`}>${isDone ? "✓ " : ""}${escapeHtml(g.theme)}<span class="x gx" data-delgame="${escapeHtml(g.theme)}">✕</span></div>`;
         }).join("");
-        const bar = pendingTheme ? `<div class="launchbar">Lancer « ${escapeHtml(pendingTheme)} » avec : <button data-launch="1" class="mini">1</button><button data-launch="2" class="mini">2</button><button data-launch="3" class="mini">3</button> joueur(s) par équipe</div>` : "";
-        inner = `<div class="gthemes">${cards}</div>${bar}`;
+        const bar = pendingTheme ? `<div class="launchbar">Lancer « ${escapeHtml(pendingTheme)} » avec : <button data-launch="1" class="mini">1</button><button data-launch="2" class="mini">2</button><button data-launch="3" class="mini">3</button><button data-launch="0" class="mini ghost">Toute l'équipe</button></div>` : "";
+        inner = `<div class="gthemes">${cards}</div>${bar}
+          <div class="btns" style="margin-top:14px"><button id="addGameBtn" class="ghost">➕ Ajouter un jeu</button></div>`;
       }
       return `<div class="card"><h2>🎡 Jeux de l'après-midi</h2><p class="addhint">${done}/${gamesData.length} jeux faits. Clique le thème tiré à la roue.</p>${inner}</div>`;
     }
@@ -259,6 +267,8 @@
       dyn.querySelectorAll("[data-cap-team]").forEach((el) => el.addEventListener("change", () => setCaptain(parseInt(el.dataset.capTeam, 10), el.value || null)));
       dyn.querySelectorAll("[data-theme]").forEach((el) => el.addEventListener("click", () => { pendingTheme = (pendingTheme === el.dataset.theme) ? null : el.dataset.theme; render(); }));
       dyn.querySelectorAll("[data-launch]").forEach((el) => el.addEventListener("click", () => launchGame(pendingTheme, parseInt(el.dataset.launch, 10))));
+      if (g("addGameBtn")) g("addGameBtn").addEventListener("click", addGame);
+      dyn.querySelectorAll("[data-delgame]").forEach((el) => el.addEventListener("click", (e) => { e.stopPropagation(); deleteGame(el.dataset.delgame); }));
     }
 
     function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
@@ -327,6 +337,22 @@
     async function cancelGame() {
       await supabase.from("games").update({ status: "todo" }).eq("status", "active");
       await Promise.all([1,2,3,4].map((t) => supabase.from("teams").update({ selected: [] }).eq("id", t)));
+      await load();
+    }
+    async function addGame() {
+      const name = prompt("Nom du nouveau jeu :");
+      if (name === null) return;
+      const theme = name.trim(); if (!theme) return;
+      const maxPos = gamesData.reduce((m, g) => Math.max(m, g.position || 0), 0);
+      const { error } = await supabase.from("games").insert({ theme, position: maxPos + 1 });
+      if (error) { alert(/duplicate|unique/i.test(error.message) ? "Ce jeu existe déjà." : "Erreur : " + error.message); return; }
+      await load();
+    }
+    async function deleteGame(theme) {
+      if (!confirm(`Supprimer le jeu « ${theme} » ?`)) return;
+      const { error } = await supabase.from("games").delete().eq("theme", theme);
+      if (error) { alert("Erreur : " + error.message); return; }
+      if (pendingTheme === theme) pendingTheme = null;
       await load();
     }
 

@@ -193,12 +193,15 @@
     function showGame() {
       const t = TEAMS[myPlayer.team]; if (!t) return showWaiting();
       setBg(t.bgTop, t.bgBottom); subtitle.textContent = "Jeu en cours !";
-      const required = activeGame.required || 1;
+      const required = activeGame.required == null ? 1 : activeGame.required;
+      const all = required === 0;
       const selected = (myTeam && Array.isArray(myTeam.selected)) ? myTeam.selected : [];
       const isCaptain = myTeam && myTeam.captain_id === myId;
       const nameOf = (id) => { const m = teammates.find((x) => x.id === id); return m ? m.name : "?"; };
-      let body = `<div class="label">Jeu en cours · Équipe ${t.name}</div><div class="game-theme" style="color:${t.hex}">${escapeHtml(activeGame.theme)}</div><div class="game-req">Votre équipe envoie ${required} joueur${required > 1 ? "s" : ""}</div>`;
-      if (isCaptain) {
+      let body = `<div class="label">Jeu en cours · Équipe ${t.name}</div><div class="game-theme" style="color:${t.hex}">${escapeHtml(activeGame.theme)}</div><div class="game-req">${all ? "Toute l'équipe joue !" : `Votre équipe envoie ${required} joueur${required > 1 ? "s" : ""}`}</div>`;
+      if (all) {
+        body += `<div class="playing">👉 Tout le monde y va — toi aussi ! 💪</div>`;
+      } else if (isCaptain) {
         const chips = teammates.map((m) => `<span class="pchip ${selected.includes(m.id) ? "sel" : ""}" data-pick="${m.id}">${escapeHtml(m.name)}</span>`).join("");
         body += `<div class="pick">${chips}</div><div class="pickcount">${selected.length}/${required} choisi${selected.length > 1 ? "s" : ""}</div>`;
         if (selected.includes(myId)) body += `<div class="playing">👉 Tu joues aussi !</div>`;
@@ -211,7 +214,7 @@
         }
       }
       screen.innerHTML = `<div class="card reveal">${body}<div class="me-pill" style="margin-top:18px">👤 ${escapeHtml(myPlayer.name)}</div></div>`;
-      if (isCaptain) screen.querySelectorAll("[data-pick]").forEach((el) => el.addEventListener("click", () => togglePick(el.dataset.pick, required)));
+      if (!all && isCaptain) screen.querySelectorAll("[data-pick]").forEach((el) => el.addEventListener("click", () => togglePick(el.dataset.pick, required)));
     }
 
     async function togglePick(pid, required) {

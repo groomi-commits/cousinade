@@ -204,7 +204,7 @@
         supabase.from("submissions").select("defi,team,points").eq("status", "approved"),
         supabase.from("state").select("phase,step").eq("id", 1).maybeSingle(),
         supabase.from("votes").select("category,candidate_id,voter_id"),
-        supabase.from("palmares").select("id,year,champion,note").order("year", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }),
+        supabase.from("palmares").select("id,year,champion,note,members").order("year", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }),
       ]);
       if (pRes.error) { dyn.innerHTML = `<div class="card"><div class="empty">Erreur : ${escapeHtml(pRes.error.message)}</div></div>`; return; }
       players = pRes.data || [];
@@ -367,7 +367,7 @@
 
     function palmaresCardHtml() {
       const list = palmaresData.length
-        ? palmaresData.map((e) => `<div class="live-row"><span class="nm">${e.year ? `<b>${escapeHtml(String(e.year))}</b> · ` : ""}${escapeHtml(e.champion)}${e.note ? ` <span class="muted">— ${escapeHtml(e.note)}</span>` : ""}</span><button class="danger" data-delpalm="${e.id}">✕</button></div>`).join("")
+        ? palmaresData.map((e) => `<div class="live-row"><span class="nm">${e.year ? `<b>${escapeHtml(String(e.year))}</b> · ` : ""}${escapeHtml(e.champion)}${e.members ? `<br/><span class="muted" style="font-weight:700">👥 ${escapeHtml(e.members)}</span>` : ""}${e.note ? ` <span class="muted">— ${escapeHtml(e.note)}</span>` : ""}</span><button class="danger" data-delpalm="${e.id}">✕</button></div>`).join("")
         : `<div class="empty">Aucune édition enregistrée pour l'instant.</div>`;
       return `<div class="card"><h2>🏅 Palmarès</h2><p class="addhint">Grave les vainqueurs (anciens comme nouveaux). Tout le monde le voit sur la page Palmarès.</p>${list}
         <div class="btns" style="margin-top:14px"><button id="gravePalmBtn" class="reveal">🏆 Graver le champion ${new Date().getFullYear()}</button></div>
@@ -595,10 +595,12 @@
       const champion = prompt("Nom du clan / vainqueur :");
       if (champion === null) return;
       const c = champion.trim(); if (!c) return;
+      const members = prompt("Noms des membres (optionnel, séparés par des virgules) :", "");
+      if (members === null) return;
       const note = prompt("Petite note (optionnel) :", "");
       if (note === null) return;
       const y = parseInt(year, 10);
-      const { error } = await supabase.from("palmares").insert({ year: isNaN(y) ? null : y, champion: c, note: note.trim() || null });
+      const { error } = await supabase.from("palmares").insert({ year: isNaN(y) ? null : y, champion: c, members: members.trim() || null, note: note.trim() || null });
       if (error) { alert("Erreur : " + error.message); return; }
       await load();
     }
@@ -606,8 +608,9 @@
       const res = awardWinnersA();
       const ranking = [1,2,3,4].map((t) => ({ t, total: teamTotal(t) + teamDefiPoints(t) + awardPointsA(t, res) })).sort((a, b) => b.total - a.total || a.t - b.t);
       const champT = ranking[0].t, champName = teamName(champT), y = new Date().getFullYear();
-      if (!confirm(`Graver « ${champName} » comme champion ${y} au palmarès ?`)) return;
-      const { error } = await supabase.from("palmares").insert({ year: y, champion: champName, note: "Vainqueur de l'Edward D'or" });
+      const members = players.filter((p) => p.team === champT).map((p) => p.name).join(", ");
+      if (!confirm(`Graver « ${champName} » comme champion ${y} au palmarès ?\n\nMembres : ${members || "—"}`)) return;
+      const { error } = await supabase.from("palmares").insert({ year: y, champion: champName, members: members || null, note: "Vainqueur de l'Edward D'or" });
       if (error) { alert("Erreur : " + error.message); return; }
       await load();
     }

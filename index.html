@@ -141,6 +141,7 @@
     .palm-card { text-align:center; margin-bottom:14px; position:relative; }
     .palm-year { display:inline-block; background:var(--pill); color:var(--accent-dark); font-family:"Fredoka",sans-serif; font-weight:700; border-radius:999px; padding:5px 16px; font-size:0.95rem; margin-bottom:8px; }
     .palm-champ { font-family:"Fredoka",sans-serif; font-weight:700; font-size:1.5rem; color:var(--ink); line-height:1.15; }
+    .palm-members { color:var(--ink); font-weight:700; margin-top:8px; font-size:0.95rem; line-height:1.4; }
     .palm-note { color:var(--muted); font-weight:700; margin-top:6px; }
 
     .menu { position:fixed; inset:0; background:rgba(58,46,34,0.5); display:flex; justify-content:flex-end; z-index:50; }
@@ -276,7 +277,7 @@
       finalePhase = data ? data.phase : "playing"; revealStep = data ? (data.step || 0) : 0;
     }
     async function loadPalmares() {
-      const { data } = await supabase.from("palmares").select("id,year,champion,note").order("year", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false });
+      const { data } = await supabase.from("palmares").select("id,year,champion,note,members").order("year", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false });
       palmaresData = data || [];
     }
     async function loadVotesP() {
@@ -475,7 +476,7 @@
         screen.innerHTML = `<div class="card placeholder"><div class="ico">🏆</div><h2>Palmarès</h2><p>Le palmarès s'écrit cette année…</p><p>Le clan qui remportera l'Edward D'or rejoindra la légende de la cousinade !</p></div>`;
         return;
       }
-      const cards = palmaresData.map((e) => `<div class="card palm-card">${e.year ? `<div class="palm-year">${escapeHtml(String(e.year))}</div>` : ""}<div class="palm-champ">🏆 ${escapeHtml(e.champion)}</div>${e.note ? `<div class="palm-note">${escapeHtml(e.note)}</div>` : ""}</div>`).join("");
+      const cards = palmaresData.map((e) => `<div class="card palm-card">${e.year ? `<div class="palm-year">${escapeHtml(String(e.year))}</div>` : ""}<div class="palm-champ">🏆 ${escapeHtml(e.champion)}</div>${e.members ? `<div class="palm-members">👥 ${escapeHtml(e.members)}</div>` : ""}${e.note ? `<div class="palm-note">${escapeHtml(e.note)}</div>` : ""}</div>`).join("");
       screen.innerHTML = `<div class="card defi-intro"><div class="ico">🏅</div><p>Les clans qui ont gravé leur nom dans l'histoire de la cousinade.</p></div>${cards}`;
     }
 

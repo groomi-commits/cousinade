@@ -10,23 +10,24 @@
   <style>
     :root { --bg-top:#ffe7b8; --bg-bottom:#ffd2a6; --card:#fffaf3; --ink:#3a2e22; --muted:#8a7a66; --accent:#ff6b4a; --accent-dark:#e8543a; --ring:rgba(255,107,74,0.35); --pill:#fff0e6; --line:#f0e3d4; }
     * { box-sizing:border-box; }
-    body { margin:0; min-height:100vh; font-family:"Nunito",system-ui,sans-serif; color:var(--ink); background:linear-gradient(170deg,var(--bg-top),var(--bg-bottom)); display:flex; justify-content:center; padding:28px 18px 48px; transition:background .5s ease; }
+    body { margin:0; min-height:100vh; font-family:"Nunito",system-ui,sans-serif; color:var(--ink); background:linear-gradient(170deg,var(--bg-top),var(--bg-bottom)); display:flex; justify-content:center; padding:24px 18px 48px; transition:background .5s ease; }
     .container { width:100%; max-width:460px; }
-    header { text-align:center; margin-bottom:22px; }
-    h1 { font-family:"Fredoka",sans-serif; font-weight:700; font-size:2.1rem; margin:0; letter-spacing:-0.5px; }
-    .subtitle { margin:6px 0 0; color:var(--muted); font-weight:700; font-size:0.95rem; }
+    .topbar { display:flex; align-items:center; justify-content:center; position:relative; }
+    h1 { font-family:"Fredoka",sans-serif; font-weight:700; font-size:2rem; margin:0; letter-spacing:-0.5px; }
+    .burger { position:absolute; right:0; top:50%; transform:translateY(-50%); background:#fffaf3; border:2px solid var(--line); border-radius:12px; width:44px; height:44px; font-size:1.3rem; cursor:pointer; color:var(--ink); display:flex; align-items:center; justify-content:center; }
+    .burger[hidden] { display:none; }
+    .subtitle { margin:6px 0 22px; color:var(--muted); font-weight:700; font-size:0.95rem; text-align:center; min-height:1.1em; }
     .card { background:var(--card); border-radius:22px; padding:22px; box-shadow:0 12px 30px rgba(120,70,30,0.12); }
     label { display:block; font-weight:800; margin:0 0 10px; font-size:1.05rem; }
     .field { margin-bottom:20px; }
     input { width:100%; font-family:inherit; font-size:1.1rem; padding:14px 16px; border:2px solid var(--line); border-radius:14px; background:#fff; color:var(--ink); outline:none; transition:border-color .15s,box-shadow .15s; }
     input:focus { border-color:var(--accent); box-shadow:0 0 0 4px var(--ring); }
-    .choices { display:flex; gap:10px; }
-    .choices.wrap { flex-wrap:wrap; gap:8px; }
+    .choices { display:flex; gap:10px; } .choices.wrap { flex-wrap:wrap; gap:8px; }
     .choice { flex:1; display:flex; align-items:center; justify-content:center; text-align:center; font-family:"Fredoka",sans-serif; font-weight:600; font-size:1.05rem; padding:13px 8px; border:2px solid var(--line); border-radius:14px; background:#fff; color:var(--ink); cursor:pointer; transition:all .12s; }
     .choices.wrap .choice { flex:1 1 30%; min-width:92px; font-size:0.98rem; padding:12px 8px; }
     .choice.selected { border-color:var(--accent); background:var(--pill); color:var(--accent-dark); }
     button.cta { width:100%; font-family:"Fredoka",sans-serif; font-weight:600; font-size:1.15rem; color:#fff; background:var(--accent); border:none; border-radius:14px; padding:16px; cursor:pointer; transition:background .15s,transform .05s; }
-    button.cta:hover { background:var(--accent-dark); } button.cta:active { transform:translateY(1px); } button.cta:disabled { opacity:0.5; cursor:default; }
+    button.cta:hover { background:var(--accent-dark); } button.cta:active { transform:translateY(1px); } button.cta:disabled { opacity:0.5; }
 
     .waiting { text-align:center; }
     .waiting .big { font-family:"Fredoka",sans-serif; font-size:1.5rem; font-weight:700; margin:4px 0 6px; }
@@ -60,14 +61,26 @@
     .chosen { margin-top:16px; font-weight:800; }
     .playing { margin-top:16px; background:#e7f7ee; border:2px solid #aee6c7; color:#14784a; border-radius:14px; padding:16px; font-family:"Fredoka",sans-serif; font-weight:700; font-size:1.3rem; }
     .waitchef { color:var(--muted); font-weight:700; margin-top:16px; }
-    .board { margin-top:22px; padding-top:20px; border-top:2px dashed var(--line); }
-    .board h3 { font-family:"Fredoka",sans-serif; font-size:1.15rem; margin:0 0 12px; text-align:center; }
-    .brow { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:12px; margin-bottom:7px; background:#fff; border:2px solid transparent; font-weight:800; }
-    .brow.me { border-color:var(--accent); }
-    .brank { font-size:1.1rem; flex:none; }
-    .bswatch { width:14px; height:14px; border-radius:50%; flex:none; }
+
+    .board h3 { font-family:"Fredoka",sans-serif; font-size:1.3rem; margin:0 0 16px; text-align:center; }
+    .brow { display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:14px; margin-bottom:8px; background:#fff; border:2px solid var(--line); font-weight:800; }
+    .brow.me { border-color:var(--accent); background:var(--pill); }
+    .brank { font-size:1.2rem; flex:none; }
+    .bswatch { width:16px; height:16px; border-radius:50%; flex:none; }
     .bname { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
     .bpts { font-family:"Fredoka",sans-serif; font-weight:700; flex:none; }
+
+    .placeholder { text-align:center; padding:20px 0; }
+    .placeholder .ico { font-size:3.4rem; margin-bottom:10px; }
+    .placeholder h2 { font-family:"Fredoka",sans-serif; margin:0 0 8px; }
+    .placeholder p { color:var(--muted); font-weight:700; margin:4px 0; }
+
+    .menu { position:fixed; inset:0; background:rgba(58,46,34,0.5); display:flex; justify-content:flex-end; z-index:50; }
+    .menu[hidden] { display:none; }
+    .menu-inner { background:var(--card); width:82%; max-width:320px; height:100%; padding:22px 18px; display:flex; flex-direction:column; gap:10px; box-shadow:-10px 0 40px rgba(0,0,0,0.25); }
+    .menu-close { align-self:flex-end; background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--muted); margin-bottom:6px; padding:4px 8px; }
+    .menu-inner a { font-family:"Fredoka",sans-serif; font-weight:600; font-size:1.2rem; padding:16px 18px; border-radius:14px; background:#fff; border:2px solid var(--line); color:var(--ink); cursor:pointer; }
+    .menu-inner a.active { border-color:var(--accent); background:var(--pill); color:var(--accent-dark); }
 
     @keyframes spin { to { transform:rotate(360deg); } }
     @keyframes pop-in { from { opacity:0; transform:scale(0.4); } to { opacity:1; transform:scale(1); } }
@@ -76,8 +89,21 @@
 </head>
 <body>
   <div class="container">
-    <header><h1>🏆 Edward D'or</h1><p class="subtitle" id="subtitle">Rejoins la partie !</p></header>
+    <header>
+      <div class="topbar"><h1>🏆 Edward D'or</h1><button id="burger" class="burger" hidden>☰</button></div>
+      <p class="subtitle" id="subtitle">Rejoins la partie !</p>
+    </header>
     <div id="screen"></div>
+  </div>
+
+  <div id="menu" class="menu" hidden>
+    <div class="menu-inner">
+      <button class="menu-close" id="menuClose">✕</button>
+      <a data-view="main">🎮 Le jeu</a>
+      <a data-view="classement">🏆 Classement</a>
+      <a data-view="palmares">🏅 Palmarès</a>
+      <a data-view="defis">🎯 Défis</a>
+    </div>
   </div>
 
   <script type="module">
@@ -92,20 +118,51 @@
       3: { name:"Vert",  emoji:"🟢", hex:"#1f9d63", bgTop:"#cdf2df", bgBottom:"#b2ead0" },
       4: { name:"Jaune", emoji:"🟡", hex:"#e8a200", bgTop:"#ffeec2", bgBottom:"#ffe29b" },
     };
-    const FAMILIES = [
-      { val:"MOUDA", label:"Mouda" }, { val:"POIRIER", label:"Poirier" }, { val:"BOUVIER", label:"Bouvier" },
-      { val:"DOUKHAN/DAINNE", label:"Doukhan/Dainne" }, { val:"AUTRE", label:"Autre" },
-    ];
+    const FAMILIES = [ {val:"MOUDA",label:"Mouda"}, {val:"POIRIER",label:"Poirier"}, {val:"BOUVIER",label:"Bouvier"}, {val:"DOUKHAN/DAINNE",label:"Doukhan/Dainne"}, {val:"AUTRE",label:"Autre"} ];
     const STORAGE_KEY = "cousinade_player_id";
+
     const screen = document.getElementById("screen");
     const subtitle = document.getElementById("subtitle");
+    const burger = document.getElementById("burger");
+    const menu = document.getElementById("menu");
+
     let myId = localStorage.getItem(STORAGE_KEY);
     let myPlayer = null, myTeam = null, activeGame = null, teammates = [], allTeams = {}, scoresData = [];
+    let currentView = "main";
 
     function setBg(top, bottom) { document.body.style.background = `linear-gradient(170deg, ${top}, ${bottom})`; }
     function resetBg() { setBg("#ffe7b8", "#ffd2a6"); }
     function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
+    const teamTotal = (t) => scoresData.filter((s) => s.team === t).reduce((a, s) => a + s.points, 0);
+    const teamDisplayName = (t) => (allTeams[t] && allTeams[t].name && allTeams[t].name.trim()) ? allTeams[t].name : `Équipe ${TEAMS[t].name}`;
 
+    // ---------- MENU ----------
+    burger.addEventListener("click", () => { menu.hidden = false; });
+    document.getElementById("menuClose").addEventListener("click", () => { menu.hidden = true; });
+    menu.addEventListener("click", (e) => { if (e.target === menu) menu.hidden = true; });
+    menu.querySelectorAll("a[data-view]").forEach((a) => a.addEventListener("click", () => { currentView = a.dataset.view; menu.hidden = true; renderCurrent(); }));
+    function updateMenuActive() { menu.querySelectorAll("a[data-view]").forEach((a) => a.classList.toggle("active", a.dataset.view === currentView)); }
+
+    // ---------- DATA ----------
+    async function loadTeams() {
+      const { data } = await supabase.from("teams").select("*");
+      allTeams = {}; (data || []).forEach((t) => (allTeams[t.id] = t));
+      myTeam = (myPlayer && myPlayer.team) ? (allTeams[myPlayer.team] || null) : null;
+    }
+    async function loadScores() { const { data } = await supabase.from("scores").select("team,points"); scoresData = data || []; }
+    async function loadActiveGame() { const { data } = await supabase.from("games").select("*").eq("status", "active").maybeSingle(); activeGame = data || null; }
+    async function loadTeammates() {
+      if (!myPlayer || !myPlayer.team) { teammates = []; return; }
+      const { data } = await supabase.from("players").select("id,name").eq("team", myPlayer.team).order("name");
+      teammates = data || [];
+    }
+    async function loadContext() {
+      if (!myPlayer) return;
+      await loadTeams(); await loadScores(); await loadActiveGame();
+      if (myPlayer.team && activeGame) await loadTeammates(); else teammates = [];
+    }
+
+    // ---------- JOIN ----------
     function showJoinForm() {
       resetBg(); subtitle.textContent = "Rejoins la partie !";
       let sex = null, age = null, fam = null;
@@ -118,15 +175,8 @@
           <div class="field"><label>Ta famille</label><div class="choices wrap" id="famChoices">${famHtml}</div></div>
           <button class="cta" id="joinBtn">C'est parti !</button>
         </div>`;
-      const nameInput = document.getElementById("nameInput");
-      const joinBtn = document.getElementById("joinBtn");
-      function wire(id, setter) {
-        const c = document.getElementById(id);
-        c.querySelectorAll(".choice").forEach((el) => el.addEventListener("click", () => {
-          c.querySelectorAll(".choice").forEach((x) => x.classList.remove("selected"));
-          el.classList.add("selected"); setter(el.dataset.val);
-        }));
-      }
+      const nameInput = document.getElementById("nameInput"), joinBtn = document.getElementById("joinBtn");
+      function wire(id, setter) { const c = document.getElementById(id); c.querySelectorAll(".choice").forEach((el) => el.addEventListener("click", () => { c.querySelectorAll(".choice").forEach((x) => x.classList.remove("selected")); el.classList.add("selected"); setter(el.dataset.val); })); }
       wire("sexChoices", (v) => (sex = v)); wire("ageChoices", (v) => (age = v)); wire("famChoices", (v) => (fam = v));
       joinBtn.addEventListener("click", async () => {
         const name = nameInput.value.trim();
@@ -137,10 +187,12 @@
         joinBtn.disabled = true; joinBtn.textContent = "On t'inscrit…";
         const { data, error } = await supabase.from("players").insert({ name, sex, age_group: age, family: fam }).select().single();
         if (error) { alert("Oups : " + error.message); joinBtn.disabled = false; joinBtn.textContent = "C'est parti !"; return; }
-        myPlayer = data; myId = data.id; localStorage.setItem(STORAGE_KEY, myId); showStatus();
+        myPlayer = data; myId = data.id; localStorage.setItem(STORAGE_KEY, myId);
+        currentView = "main"; await loadContext(); renderCurrent();
       });
     }
 
+    // ---------- MAIN SUB-VIEWS ----------
     function showWaiting() {
       resetBg(); subtitle.textContent = "Tu es bien inscrit·e !";
       screen.innerHTML = `<div class="card waiting"><div class="spinner"></div><p class="big">Salut ${escapeHtml(myPlayer.name)} 👋</p><p class="hint">En attente du tirage des équipes…</p><span class="count-badge" id="countBadge">…</span></div>`;
@@ -150,33 +202,6 @@
       const badge = document.getElementById("countBadge"); if (!badge) return;
       const { count } = await supabase.from("players").select("*", { count:"exact", head:true });
       badge.textContent = (count ?? 0) + " cousin·e·s inscrit·e·s";
-    }
-
-    async function loadTeams() {
-      const { data } = await supabase.from("teams").select("*");
-      allTeams = {}; (data || []).forEach((t) => (allTeams[t.id] = t));
-      myTeam = (myPlayer && myPlayer.team) ? (allTeams[myPlayer.team] || null) : null;
-    }
-    async function loadScores() {
-      const { data } = await supabase.from("scores").select("team,points");
-      scoresData = data || [];
-    }
-    const teamTotal = (t) => scoresData.filter((s) => s.team === t).reduce((a, s) => a + s.points, 0);
-    const teamDisplayName = (t) => (allTeams[t] && allTeams[t].name && allTeams[t].name.trim()) ? allTeams[t].name : `Équipe ${TEAMS[t].name}`;
-    function leaderboardHtml() {
-      const medals = ["🥇","🥈","🥉","4️⃣"];
-      const ranked = [1,2,3,4].map((t) => ({ t, total: teamTotal(t) })).sort((a, b) => b.total - a.total || a.t - b.t);
-      const rows = ranked.map((r, i) => `<div class="brow ${r.t === myPlayer.team ? "me" : ""}"><span class="brank">${medals[i]}</span><span class="bswatch" style="background:${TEAMS[r.t].hex}"></span><span class="bname">${escapeHtml(teamDisplayName(r.t))}</span><span class="bpts">${r.total} pts</span></div>`).join("");
-      return `<div class="board"><h3>🏆 Classement</h3>${rows}</div>`;
-    }
-    async function loadActiveGame() {
-      const { data } = await supabase.from("games").select("*").eq("status", "active").maybeSingle();
-      activeGame = data || null;
-    }
-    async function loadTeammates() {
-      if (!myPlayer || !myPlayer.team) { teammates = []; return; }
-      const { data } = await supabase.from("players").select("id,name").eq("team", myPlayer.team).order("name");
-      teammates = data || [];
     }
 
     function showReveal() {
@@ -189,13 +214,11 @@
       const captainHtml = isCaptain ? `
         <div class="captain-box">
           <div class="captain-badge">👑 Tu es le chef !</div>
-          <div class="chef-panel">
-            <div class="lbl">Donne un nom à ton équipe</div>
+          <div class="chef-panel"><div class="lbl">Donne un nom à ton équipe</div>
             <div class="row"><input id="teamNameInput" type="text" maxlength="30" placeholder="Ex : Les Bisons" value="${custom ? escapeHtml(myTeam.name) : ""}" /><button id="renameBtn">Valider</button></div>
-            <div class="saved" id="savedMsg"></div>
-          </div>
+            <div class="saved" id="savedMsg"></div></div>
         </div>` : "";
-      screen.innerHTML = `<div class="card reveal"><div class="label">Ton équipe</div><div class="team-badge" style="background:${t.hex}">${t.emoji}</div><div class="team-name" style="color:${t.hex}">${bigName}</div><div class="team-sub">${subName}</div><div class="me-pill">👤 ${escapeHtml(myPlayer.name)}</div>${captainHtml}${leaderboardHtml()}</div>`;
+      screen.innerHTML = `<div class="card reveal"><div class="label">Ton équipe</div><div class="team-badge" style="background:${t.hex}">${t.emoji}</div><div class="team-name" style="color:${t.hex}">${bigName}</div><div class="team-sub">${subName}</div><div class="me-pill">👤 ${escapeHtml(myPlayer.name)}</div>${captainHtml}</div>`;
       if (isCaptain) {
         const input = document.getElementById("teamNameInput"), btn = document.getElementById("renameBtn"), saved = document.getElementById("savedMsg");
         const doRename = async () => {
@@ -219,19 +242,15 @@
       const isCaptain = myTeam && myTeam.captain_id === myId;
       const nameOf = (id) => { const m = teammates.find((x) => x.id === id); return m ? m.name : "?"; };
       let body = `<div class="label">Jeu en cours · Équipe ${t.name}</div><div class="game-theme" style="color:${t.hex}">${escapeHtml(activeGame.theme)}</div><div class="game-req">${all ? "Toute l'équipe joue !" : `Votre équipe envoie ${required} joueur${required > 1 ? "s" : ""}`}</div>`;
-      if (all) {
-        body += `<div class="playing">👉 Tout le monde y va — toi aussi ! 💪</div>`;
-      } else if (isCaptain) {
+      if (all) { body += `<div class="playing">👉 Tout le monde y va — toi aussi ! 💪</div>`; }
+      else if (isCaptain) {
         const chips = teammates.map((m) => `<span class="pchip ${selected.includes(m.id) ? "sel" : ""}" data-pick="${m.id}">${escapeHtml(m.name)}</span>`).join("");
         body += `<div class="pick">${chips}</div><div class="pickcount">${selected.length}/${required} choisi${selected.length > 1 ? "s" : ""}</div>`;
         if (selected.includes(myId)) body += `<div class="playing">👉 Tu joues aussi !</div>`;
       } else {
         if (!myTeam || !myTeam.captain_id) body += `<div class="waitchef">Aucun chef désigné pour ton équipe — voir l'organisateur.</div>`;
         else if (selected.length === 0) body += `<div class="waitchef">⏳ Ton chef choisit les joueurs…</div>`;
-        else {
-          body += `<div class="chosen">Désigné·e·s : ${selected.map(nameOf).map(escapeHtml).join(", ")}</div>`;
-          if (selected.includes(myId)) body += `<div class="playing">👉 C'est toi qui joues !</div>`;
-        }
+        else { body += `<div class="chosen">Désigné·e·s : ${selected.map(nameOf).map(escapeHtml).join(", ")}</div>`; if (selected.includes(myId)) body += `<div class="playing">👉 C'est toi qui joues !</div>`; }
       }
       screen.innerHTML = `<div class="card reveal">${body}<div class="me-pill" style="margin-top:18px">👤 ${escapeHtml(myPlayer.name)}</div></div>`;
       if (!all && isCaptain) screen.querySelectorAll("[data-pick]").forEach((el) => el.addEventListener("click", () => togglePick(el.dataset.pick, required)));
@@ -247,30 +266,52 @@
       if (error) alert("Erreur : " + error.message);
     }
 
-    async function showStatus() {
-      if (myPlayer && myPlayer.team) {
-        await loadTeams(); await loadScores(); await loadActiveGame();
-        if (activeGame) { await loadTeammates(); showGame(); }
-        else { const typing = document.activeElement && document.activeElement.id === "teamNameInput"; if (!typing) showReveal(); }
-      } else showWaiting();
+    // ---------- OTHER VIEWS ----------
+    function classementView() {
+      resetBg(); subtitle.textContent = "Le classement en direct";
+      const medals = ["🥇","🥈","🥉","4️⃣"];
+      const ranked = [1,2,3,4].map((t) => ({ t, total: teamTotal(t) })).sort((a, b) => b.total - a.total || a.t - b.t);
+      const rows = ranked.map((r, i) => `<div class="brow ${r.t === (myPlayer && myPlayer.team) ? "me" : ""}"><span class="brank">${medals[i]}</span><span class="bswatch" style="background:${TEAMS[r.t].hex}"></span><span class="bname">${escapeHtml(teamDisplayName(r.t))}</span><span class="bpts">${r.total} pts</span></div>`).join("");
+      screen.innerHTML = `<div class="card board"><h3>🏆 Classement</h3>${rows}</div>`;
+    }
+    function placeholderView(ico, title, text) {
+      resetBg(); subtitle.textContent = "";
+      screen.innerHTML = `<div class="card placeholder"><div class="ico">${ico}</div><h2>${title}</h2><p>${text}</p><p>🚧 Bientôt disponible !</p></div>`;
     }
 
+    // ---------- ROUTER ----------
+    function renderCurrent() {
+      if (!myPlayer) { burger.hidden = true; menu.hidden = true; showJoinForm(); return; }
+      burger.hidden = false; updateMenuActive();
+      if (currentView === "classement") return classementView();
+      if (currentView === "palmares") return placeholderView("🏅", "Palmarès", "Les vainqueurs des éditions passées s'afficheront ici.");
+      if (currentView === "defis") return placeholderView("🎯", "Défis", "Des défis bonus à relever pour gagner des points.");
+      // main
+      if (!myPlayer.team) { showWaiting(); return; }
+      if (activeGame) { showGame(); return; }
+      const typing = document.activeElement && document.activeElement.id === "teamNameInput";
+      if (!typing) showReveal();
+    }
+
+    async function syncAndRender() { await loadContext(); renderCurrent(); }
+
+    // ---------- REALTIME ----------
     function subscribeRealtime() {
       supabase.channel("player-watch")
         .on("postgres_changes", { event:"INSERT", schema:"public", table:"players" }, () => updateCount())
-        .on("postgres_changes", { event:"UPDATE", schema:"public", table:"players" }, (p) => { if (p.new.id === myId) { myPlayer = p.new; showStatus(); } })
-        .on("postgres_changes", { event:"DELETE", schema:"public", table:"players" }, (p) => { if (p.old.id === myId) { localStorage.removeItem(STORAGE_KEY); myId = null; myPlayer = null; myTeam = null; showJoinForm(); } })
-        .on("postgres_changes", { event:"*", schema:"public", table:"teams" }, () => showStatus())
-        .on("postgres_changes", { event:"*", schema:"public", table:"games" }, () => showStatus())
-        .on("postgres_changes", { event:"*", schema:"public", table:"scores" }, () => showStatus())
+        .on("postgres_changes", { event:"UPDATE", schema:"public", table:"players" }, (p) => { if (p.new.id === myId) { myPlayer = p.new; syncAndRender(); } })
+        .on("postgres_changes", { event:"DELETE", schema:"public", table:"players" }, (p) => { if (p.old.id === myId) { localStorage.removeItem(STORAGE_KEY); myId = null; myPlayer = null; myTeam = null; currentView = "main"; renderCurrent(); } })
+        .on("postgres_changes", { event:"*", schema:"public", table:"teams" }, () => syncAndRender())
+        .on("postgres_changes", { event:"*", schema:"public", table:"games" }, () => syncAndRender())
+        .on("postgres_changes", { event:"*", schema:"public", table:"scores" }, () => syncAndRender())
         .subscribe();
     }
 
     async function refreshState() {
       if (!myId) return;
       const { data } = await supabase.from("players").select("*").eq("id", myId).maybeSingle();
-      if (data) { myPlayer = data; showStatus(); }
-      else { localStorage.removeItem(STORAGE_KEY); myId = null; myPlayer = null; myTeam = null; showJoinForm(); }
+      if (data) { myPlayer = data; await syncAndRender(); }
+      else { localStorage.removeItem(STORAGE_KEY); myId = null; myPlayer = null; myTeam = null; renderCurrent(); }
     }
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refreshState(); });
     window.addEventListener("focus", refreshState);
@@ -279,8 +320,10 @@
     async function init() {
       if (myId) {
         const { data } = await supabase.from("players").select("*").eq("id", myId).maybeSingle();
-        if (data) { myPlayer = data; showStatus(); } else { localStorage.removeItem(STORAGE_KEY); myId = null; showJoinForm(); }
-      } else showJoinForm();
+        if (data) { myPlayer = data; await loadContext(); }
+        else { localStorage.removeItem(STORAGE_KEY); myId = null; }
+      }
+      renderCurrent();
       subscribeRealtime();
     }
     init();
